@@ -32,7 +32,7 @@ public class AuroraGreetingTest {
     }
 
     private static void awaitLanguage(ActivityScenario<AuroraActivity> scene, boolean urdu) {
-        long deadline = SystemClock.uptimeMillis() + 12000;
+        long deadline = SystemClock.uptimeMillis() + 17000;
         AtomicBoolean met = new AtomicBoolean();
         do {
             scene.onActivity(activity -> {
@@ -43,18 +43,18 @@ public class AuroraGreetingTest {
             if (met.get()) return;
             SystemClock.sleep(50);
         } while (SystemClock.uptimeMillis() < deadline);
-        fail("Greeting did not complete its ten-second language transition");
+        fail("Greeting did not complete its scheduled language transition");
     }
 
-    @Test public void alternatesEveryTenSecondsKeepsUrduOnClockRefreshAndResetsAfterPanel() {
+    @Test public void alternatesFifteenSecondEnglishAndTenSecondUrduAndResetsAfterPanel() {
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
             awaitLanguage(scene, false);
             long start = SystemClock.uptimeMillis();
-            SystemClock.sleep(8500);
+            SystemClock.sleep(13500);
             scene.onActivity(activity -> assertEquals(activity.getString(expected(false)),
                     ((TextView) activity.findViewById(R.id.greeting)).getText()));
             awaitLanguage(scene, true);
-            assertTrue(SystemClock.uptimeMillis() - start >= 9500);
+            assertTrue(SystemClock.uptimeMillis() - start >= 14500);
             scene.onActivity(activity -> {
                 AuroraHomeView home = (AuroraHomeView) field(activity, "home");
                 TextView greeting = activity.findViewById(R.id.greeting);
@@ -70,7 +70,14 @@ public class AuroraGreetingTest {
             });
             awaitLanguage(scene, false);
             long elapsed = SystemClock.uptimeMillis() - start;
-            assertTrue("Must return after the Urdu interval, not immediately", elapsed >= 19500);
+            assertTrue("Must return after the ten-second Urdu interval", elapsed >= 24500);
+            assertTrue("Urdu must not stay visible for fifteen seconds", elapsed < 27500);
+            SystemClock.sleep(11000);
+            scene.onActivity(activity -> assertEquals(activity.getString(expected(false)),
+                    ((TextView) activity.findViewById(R.id.greeting)).getText()));
+            awaitLanguage(scene, true);
+            assertTrue("Subsequent English intervals must also last fifteen seconds",
+                    SystemClock.uptimeMillis() - start >= 39500);
             androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.isRoot())
                     .perform(androidx.test.espresso.action.ViewActions.pressKey(KeyEvent.KEYCODE_MENU));
             scene.onActivity(activity -> {

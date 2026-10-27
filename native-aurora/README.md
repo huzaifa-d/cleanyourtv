@@ -112,6 +112,10 @@ Branded shortcuts are white at rest at 1.5x the original artwork dimensions.
 Focus uses the brand artwork at 2x original size, with no selection box or fill.
 Apple TV uses Apple's pearlescent mark on focus. All Apps is labelled
 and scrollable. Missing applications show a message, never a store redirect.
+Native home glyphs are rasterised at output resolution, including All Apps'
+maximum focus size. Brand images are decoded for that same focused output size,
+bounded by the original asset resolution. Library icons use their displayed
+pixel dimensions and a size-aware cache; icon artwork and layout are unchanged.
 The clock uses the device's timezone and 12/24-hour preference.
 Its small white status icon shows Ethernet or Wi-Fi when Android validates the
 default connection's internet access, or a crossed-out connection otherwise,
@@ -119,8 +123,8 @@ including captive portals. An unusual validated transport uses a generic online
 glyph. This is system-reported status, not a guarantee every service is reachable.
 Updates use a foreground network callback, without polling or external requests.
 
-The greeting alternates English and Urdu every ten seconds with a gentle
-400 ms fade/slide. Urdu uses bundled OFL-licensed Noto Sans Arabic with native
+The greeting alternates fifteen seconds of English with ten seconds of Urdu,
+using a gentle 400 ms fade/slide. Urdu uses bundled OFL-licensed Noto Sans Arabic with native
 right-to-left shaping on one horizontal line, anchored beside the profile. Time-of-day updates preserve
 the current language. The cycle stops behind panels and when Home is inactive;
 returning starts a fresh English interval. Only the greeting animates.

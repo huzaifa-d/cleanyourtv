@@ -88,9 +88,10 @@ final class AppCatalog {
         });
     }
 
-    void icon(Entry entry, Consumer<Bitmap> callback) {
+    void icon(Entry entry, int size, Consumer<Bitmap> callback) {
         if (closed) return;
-        Bitmap cached = icons.get(entry.packageName);
+        String key = entry.packageName + ":" + size;
+        Bitmap cached = icons.get(key);
         if (cached != null) { callback.accept(cached); return; }
         int generation = iconGeneration;
         loader.execute(() -> {
@@ -98,8 +99,8 @@ final class AppCatalog {
             Bitmap bitmap = null;
             try {
                 Drawable drawable = context.getPackageManager().getActivityIcon(entry.component);
-                bitmap = Bitmap.createBitmap(96, 96, Bitmap.Config.ARGB_8888);
-                drawable.setBounds(0, 0, 96, 96);
+                bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+                drawable.setBounds(0, 0, size, size);
                 drawable.draw(new Canvas(bitmap));
             } catch (PackageManager.NameNotFoundException | RuntimeException unavailable) {
                 bitmap = null;
@@ -107,7 +108,7 @@ final class AppCatalog {
             Bitmap loaded = bitmap;
             main.post(() -> {
                 if (closed || generation != iconGeneration) return;
-                if (loaded != null) icons.put(entry.packageName, loaded);
+                if (loaded != null) icons.put(key, loaded);
                 callback.accept(loaded);
             });
         });

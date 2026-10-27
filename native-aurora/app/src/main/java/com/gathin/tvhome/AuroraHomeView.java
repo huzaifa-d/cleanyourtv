@@ -28,26 +28,28 @@ final class AuroraHomeView extends FrameLayout {
     private final FrameLayout composition;
     private final View[] tiles = new View[BrandShortcut.values().length];
     private final Bitmap[][] logos = new Bitmap[BrandShortcut.values().length][2];
-    private final ImageView profile;
+    private final OutputResolutionIconView profile;
     private final TextView greeting, clock, memory;
     private final Typeface typeface, urduTypeface;
     private final HomeNavigation navigation;
     private final ImageView still;
-    private final ImageView network;
+    private final OutputResolutionIconView network;
+    private float iconScale;
     private boolean greetingActive, greetingUrdu;
     private int greetingGeneration;
     private final Runnable greetingTick = new Runnable() {
         @Override public void run() {
             if (!greetingActive) return;
             int token = greetingGeneration;
+            boolean nextUrdu = !greetingUrdu;
             greeting.animate().alpha(0f).translationY(-4f).setDuration(200).withEndAction(() -> {
                 if (!greetingActive || token != greetingGeneration) return;
-                greetingUrdu = !greetingUrdu;
+                greetingUrdu = nextUrdu;
                 updateGreeting();
                 greeting.setTranslationY(4f);
                 greeting.animate().alpha(1f).translationY(0f).setDuration(200).start();
             }).start();
-            postDelayed(this, 10000);
+            postDelayed(this, nextUrdu ? 10000 : 15000);
         }
     };
 
@@ -75,7 +77,7 @@ final class AuroraHomeView extends FrameLayout {
                 new int[] {0x20000000, Color.TRANSPARENT, 0x4D000000}));
         composition.addView(shade, position(960, 540, 0, 0));
 
-        profile = new ImageView(context);
+        profile = new OutputResolutionIconView(context);
         profile.setId(R.id.profile);
         profile.setImageResource(R.drawable.aurora_profile);
         profile.setPadding(2, 2, 2, 2);
@@ -100,7 +102,7 @@ final class AuroraHomeView extends FrameLayout {
         clock.setFontFeatureSettings("tnum");
         LinearLayout clockGroup = new LinearLayout(context);
         clockGroup.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
-        network = new ImageView(context);
+        network = new OutputResolutionIconView(context);
         network.setId(R.id.network_status);
         network.setScaleType(ImageView.ScaleType.FIT_CENTER);
         LinearLayout.LayoutParams networkPosition = new LinearLayout.LayoutParams(18, 18);
@@ -120,15 +122,12 @@ final class AuroraHomeView extends FrameLayout {
             tile.setFocusableInTouchMode(true);
             tile.setContentDescription(brand.label);
             tile.setOnClickListener(v -> selected.accept(index));
-            ImageView mark = new ImageView(context);
+            ImageView mark = brand == BrandShortcut.ALL
+                    ? new OutputResolutionIconView(context) : new ImageView(context);
             mark.setScaleType(ImageView.ScaleType.FIT_CENTER);
             mark.setScaleX(1.5f);
             mark.setScaleY(1.5f);
-            if (brand != BrandShortcut.ALL) {
-                logos[index][0] = decode("aurora/icons/" + brand.assetStem + "-white.png", 256);
-                logos[index][1] = decode("aurora/icons/" + brand.assetStem + "-colour.png", 256);
-                mark.setImageBitmap(logos[index][0]);
-            } else mark.setImageResource(R.drawable.aurora_apps);
+            if (brand == BrandShortcut.ALL) mark.setImageResource(R.drawable.aurora_apps);
             tile.addView(mark, new FrameLayout.LayoutParams(brand.width, brand.height, Gravity.CENTER));
             tiles[index] = tile;
             tile.setOnFocusChangeListener((v, focused) -> {
@@ -197,6 +196,25 @@ final class AuroraHomeView extends FrameLayout {
         } catch (IOException unavailable) { return null; }
     }
 
+    private void updateIconResolution(float scale) {
+        if (scale <= 0 || iconScale == scale) return;
+        iconScale = scale;
+        profile.setOutputScale(scale);
+        network.setOutputScale(scale);
+        for (BrandShortcut brand : BrandShortcut.values()) {
+            int index = brand.ordinal();
+            ImageView mark = (ImageView) ((FrameLayout) tiles[index]).getChildAt(0);
+            if (brand == BrandShortcut.ALL) {
+                ((OutputResolutionIconView) mark).setOutputScale(scale * 2f);
+            } else {
+                int width = (int) Math.ceil(brand.width * 2f * scale);
+                logos[index][0] = decode("aurora/icons/" + brand.assetStem + "-white.png", width);
+                logos[index][1] = decode("aurora/icons/" + brand.assetStem + "-colour.png", width);
+                mark.setImageBitmap(logos[index][tiles[index].hasFocus() ? 1 : 0]);
+            }
+        }
+    }
+
     void applyFocus(int target) {
         if (target == HomeNavigation.IDLE) composition.requestFocus();
         else if (target == HomeNavigation.PROFILE) profile.requestFocus();
@@ -213,7 +231,7 @@ final class AuroraHomeView extends FrameLayout {
         greeting.setTranslationY(0f);
         greetingUrdu = false;
         updateGreeting();
-        if (active) postDelayed(greetingTick, 10000);
+        if (active) postDelayed(greetingTick, 15000);
     }
     void setNetworkStatus(NetworkMonitor.Status status) {
         network.setImageResource(status.drawable);
@@ -252,6 +270,7 @@ final class AuroraHomeView extends FrameLayout {
         float scale = Math.min(getWidth() / 960f, getHeight() / 540f);
         int x = Math.round((getWidth() - 960 * scale) / 2);
         int y = Math.round((getHeight() - 540 * scale) / 2);
+        updateIconResolution(scale);
         composition.layout(x, y, x + 960, y + 540);
         composition.setPivotX(0);
         composition.setPivotY(0);

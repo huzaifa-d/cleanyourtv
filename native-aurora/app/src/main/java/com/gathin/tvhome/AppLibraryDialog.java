@@ -151,7 +151,7 @@ final class AppLibraryDialog {
             holder.label.setText(entry.label);
             holder.itemView.setContentDescription(entry.label);
             holder.icon.setImageResource(R.drawable.aurora_apps);
-            catalog.icon(entry, bitmap -> {
+            catalog.icon(entry, dp(58), bitmap -> {
                 if (isShowing() && entry.packageName.equals(holder.bound) && bitmap != null) {
                     holder.icon.setImageBitmap(bitmap);
                 }
