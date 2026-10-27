@@ -25,3 +25,16 @@ SOFTWARE.
 The Outfit typeface in launcher/app/src/main/res/font/outfit.ttf is copyright
 The Outfit Project Authors and licensed under the SIL Open Font License 1.1,
 see launcher/FONT-LICENSE-OFL.txt.
+
+---
+
+AndroidX Media3 ExoPlayer 1.4.1
+Copyright The Android Open Source Project.
+Licensed under Apache License 2.0; see MEDIA3-LICENSE.txt.
+Source: https://github.com/androidx/media/tree/1.4.1
+
+Noto Sans Arabic
+Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic).
+Licensed under SIL Open Font License 1.1.
+See assets/fonts/NotoSansArabic-OFL.txt.
+Source: https://github.com/google/fonts/tree/main/ofl/notosansarabic

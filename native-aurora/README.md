@@ -18,7 +18,8 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 
 It installs alongside Neons and CleanYourTV. It does not choose default Home,
 disable packages, run cleanup, intercept global remote keys or enable services.
-There are no storage, network, accessibility or privileged-settings permissions.
+The only permission is `ACCESS_NETWORK_STATE`, for the clock's connection icon.
+There are no internet, storage, accessibility or privileged-settings permissions.
 
 ## Build
 
@@ -112,22 +113,38 @@ Focus uses the brand artwork at 2x original size, with no selection box or fill.
 Apple TV uses Apple's pearlescent mark on focus. All Apps is labelled
 and scrollable. Missing applications show a message, never a store redirect.
 The clock uses the device's timezone and 12/24-hour preference.
+Its small white status icon shows Ethernet or Wi-Fi when Android validates the
+default connection's internet access, or a crossed-out connection otherwise,
+including captive portals. An unusual validated transport uses a generic online
+glyph. This is system-reported status, not a guarantee every service is reachable.
+Updates use a foreground network callback, without polling or external requests.
+
+The greeting alternates English and Urdu every ten seconds with a gentle
+400 ms fade/slide. Urdu uses bundled OFL-licensed Noto Sans Arabic with native
+right-to-left shaping on one horizontal line, anchored beside the profile. Time-of-day updates preserve
+the current language. The cycle stops behind panels and when Home is inactive;
+returning starts a fresh English interval. Only the greeting animates.
 
 The hub contains Background, Show RAM counter, HDMI / Inputs, System settings,
 App management and About/credits. Inputs use Android TV channel intents and
 Sony fallbacks; they do not remap physical remote keys.
 
-Background speed choices are **0.25x through 2x in 0.25x steps**, initially
-**0.5x**. The 12-second Blue Bokeh source therefore has a 24-second
-loop at the default speed. Selection, speed and RAM visibility persist across
-restarts and in-place updates. **Default background** resets the source, not the
-chosen speed.
+All backgrounds play at **1x**, including custom MP4s. There is no speed selector;
+previously saved speed values are ignored. The 12-second Blue Bokeh source
+therefore repeats every 12 seconds. Selection and RAM visibility persist across
+restarts and in-place updates. **Default background** resets the source.
 
-Playback is silent, looping and centre-cropped through one native MediaPlayer /
-SurfaceView. Opening a panel, leaving Home, losing the surface or screen-off
+Playback is silent, looping and centre-cropped through one Media3 ExoPlayer /
+SurfaceView, with audio/text tracks disabled. Two references to the same local
+clip form a repeating playlist, queuing the next loop without the native
+MediaPlayer's end-of-file seek/decoder flush. Only one video decoder is used;
+compressed buffering targets 4 MiB and five seconds, not decoded-frame
+or dual-player crossfading. The bundled video's frames/motion are unchanged;
+a visible discontinuity already in any supplied clip is not edited away.
+Opening a panel, leaving Home, losing the surface or screen-off
 releases the player. Returning restarts from the beginning. Failed, missing,
 unsupported or timed-out media falls back to the still wallpaper without a retry
-loop. Settings remain available to reset the source or speed.
+loop. Settings remain available to reset the source.
 
 The RAM counter defaults on. Turning it off hides both lines and cancels polling;
 there is no background polling service. Enabled readings run off the UI thread
@@ -154,10 +171,10 @@ permissions, Flutter runtime and test media, verifies the signature, and checks
 the bundled default video's format and hash.
 
 An emulator cannot establish Sony remote/input compatibility, 4K AV1 decoder
-behaviour, supported speeds, loop quality or real RAM savings.
+behaviour, loop quality or real RAM savings.
 
 Before calling this verified on the Sony TV, exercise app launch/return, all
-inputs, actual ADB transfer, original Blue Bokeh, every speed, repeated panel
+inputs, actual ADB transfer, original Blue Bokeh at 1x, repeated panel
 open/close, missing/corrupt media, sleep/wake and RAM toggling. Installation does
 not make Aurora the default Home. No performance gain is claimed without
 equivalent-workload release measurements on the same TV.
@@ -175,4 +192,4 @@ run them against an arbitrary first connected device.
 The bundled Android-test-only `playback-test.mp4` is a synthetic 320x180, one-second
 H.264 fixture generated with FFmpeg's `testsrc2`; it is not the personal clip and
 is not included in the release APK. It exercises actual file playback, looping,
-half-speed parameters, fallback and native-player release.
+fixed 1x playback despite legacy preferences, fallback and native-player release.

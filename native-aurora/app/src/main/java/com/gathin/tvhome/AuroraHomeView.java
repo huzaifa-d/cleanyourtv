@@ -13,10 +13,12 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.function.IntConsumer;
 
 final class AuroraHomeView extends FrameLayout {
@@ -28,15 +30,33 @@ final class AuroraHomeView extends FrameLayout {
     private final Bitmap[][] logos = new Bitmap[BrandShortcut.values().length][2];
     private final ImageView profile;
     private final TextView greeting, clock, memory;
-    private final Typeface typeface;
+    private final Typeface typeface, urduTypeface;
     private final HomeNavigation navigation;
     private final ImageView still;
+    private final ImageView network;
+    private boolean greetingActive, greetingUrdu;
+    private int greetingGeneration;
+    private final Runnable greetingTick = new Runnable() {
+        @Override public void run() {
+            if (!greetingActive) return;
+            int token = greetingGeneration;
+            greeting.animate().alpha(0f).translationY(-4f).setDuration(200).withEndAction(() -> {
+                if (!greetingActive || token != greetingGeneration) return;
+                greetingUrdu = !greetingUrdu;
+                updateGreeting();
+                greeting.setTranslationY(4f);
+                greeting.animate().alpha(1f).translationY(0f).setDuration(200).start();
+            }).start();
+            postDelayed(this, 10000);
+        }
+    };
 
     AuroraHomeView(Context context, HomeNavigation navigation, IntConsumer selected) {
         super(context);
         this.navigation = navigation;
         setBackgroundColor(0xFF171B35);
         typeface = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto.ttf");
+        urduTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSansArabic.ttf");
         composition = new FrameLayout(context);
         composition.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         composition.setClipChildren(false);
@@ -70,12 +90,25 @@ final class AuroraHomeView extends FrameLayout {
         profile.setBackground(frame(false, true));
         composition.addView(profile, position(21, 21, 54, 39));
         greeting = text(15.6f);
-        composition.addView(greeting, position(500, 25, 85, 38));
+        greeting.setId(R.id.greeting);
+        greeting.setSingleLine(true);
+        greeting.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        composition.addView(greeting, position(500, 64, 85, 18));
         clock = text(17.3f);
         clock.setId(R.id.clock);
         clock.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         clock.setFontFeatureSettings("tnum");
-        composition.addView(clock, position(180, 25, 726, 37));
+        LinearLayout clockGroup = new LinearLayout(context);
+        clockGroup.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        network = new ImageView(context);
+        network.setId(R.id.network_status);
+        network.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        LinearLayout.LayoutParams networkPosition = new LinearLayout.LayoutParams(18, 18);
+        networkPosition.rightMargin = 10;
+        clockGroup.addView(network, networkPosition);
+        clockGroup.addView(clock, new LinearLayout.LayoutParams(-2, 25));
+        composition.addView(clockGroup, position(210, 25, 696, 37));
+        setNetworkStatus(NetworkMonitor.Status.OFFLINE);
 
         for (BrandShortcut brand : BrandShortcut.values()) {
             int index = brand.ordinal();
@@ -170,6 +203,22 @@ final class AuroraHomeView extends FrameLayout {
         else tiles[target].requestFocus();
     }
     void setMemoryText(String reading) { memory.setText(reading); }
+    void setGreetingActive(boolean active) {
+        if (greetingActive == active) return;
+        greetingActive = active;
+        greetingGeneration++;
+        removeCallbacks(greetingTick);
+        greeting.animate().cancel();
+        greeting.setAlpha(1f);
+        greeting.setTranslationY(0f);
+        greetingUrdu = false;
+        updateGreeting();
+        if (active) postDelayed(greetingTick, 10000);
+    }
+    void setNetworkStatus(NetworkMonitor.Status status) {
+        network.setImageResource(status.drawable);
+        network.setContentDescription(getContext().getString(status.description));
+    }
     void setMemoryVisible(boolean visible) { memory.setVisibility(visible ? VISIBLE : GONE); }
     void setVideoVisible(boolean visible) {
         still.setVisibility(visible ? INVISIBLE : VISIBLE);
@@ -177,10 +226,20 @@ final class AuroraHomeView extends FrameLayout {
     }
     void updateClock() {
         Calendar now = Calendar.getInstance();
-        int hour = now.get(Calendar.HOUR_OF_DAY);
-        greeting.setText(getContext().getString(hour < 12 ? R.string.good_morning
-                : hour < 18 ? R.string.good_afternoon : R.string.good_evening));
+        updateGreeting();
         clock.setText(DateFormat.format(DateFormat.is24HourFormat(getContext()) ? "HH:mm" : "h:mm a", now));
+    }
+    private void updateGreeting() {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        int label = greetingUrdu ? hour < 12 ? R.string.good_morning_urdu
+                : hour < 18 ? R.string.good_afternoon_urdu : R.string.good_evening_urdu
+                : hour < 12 ? R.string.good_morning
+                : hour < 18 ? R.string.good_afternoon : R.string.good_evening;
+        greeting.setTypeface(greetingUrdu ? urduTypeface : typeface);
+        greeting.setIncludeFontPadding(greetingUrdu);
+        greeting.setTextLocale(greetingUrdu ? new Locale("ur") : Locale.ENGLISH);
+        greeting.setTextDirection(greetingUrdu ? View.TEXT_DIRECTION_RTL : View.TEXT_DIRECTION_LTR);
+        greeting.setText(getContext().getString(label));
     }
 
     @Override protected void onMeasure(int widthSpec, int heightSpec) {

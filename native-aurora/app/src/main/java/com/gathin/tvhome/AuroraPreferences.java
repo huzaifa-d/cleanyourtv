@@ -17,16 +17,4 @@ final class AuroraPreferences {
         }
         store.edit().putString("video", filename).apply();
     }
-    float speed() {
-        float speed = store.getFloat("speed", 0.5f);
-        return validSpeed(speed) ? speed : 0.5f;
-    }
-    void setSpeed(float value) {
-        if (!validSpeed(value)) throw new IllegalArgumentException("Unsupported playback speed");
-        store.edit().putFloat("speed", value).apply();
-    }
-    static boolean validSpeed(float value) {
-        return Float.isFinite(value) && value >= 0.25f && value <= 2f
-                && value * 4f == Math.round(value * 4f);
-    }
 }

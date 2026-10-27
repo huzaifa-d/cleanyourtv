@@ -10,11 +10,9 @@ public class BackgroundSessionTest {
     static final class FakePlayer implements BackgroundSession.Player {
         BackgroundSession.Events events;
         int starts, releases;
-        float speed;
         boolean throwPrepare, throwStart;
-        @Override public void prepare(String source, float speed, BackgroundSession.Events events) {
+        @Override public void prepare(String source, BackgroundSession.Events events) {
             this.events = events;
-            this.speed = speed;
             if (throwPrepare) throw new IllegalStateException();
         }
         @Override public void start() {
@@ -47,34 +45,33 @@ public class BackgroundSessionTest {
             () -> { }, () -> videos++, () -> failures++);
 
     @Test public void oldPreparedEventCannotRestartReleasedPlayer() {
-        session.activate("video", 0.5f);
+        session.activate("video");
         FakePlayer first = factory.players.get(0);
         session.deactivate();
-        session.activate("video", 0.75f);
+        session.activate("video");
         first.events.prepared();
         assertEquals(0, first.starts);
         assertEquals(1, first.releases);
         FakePlayer second = factory.players.get(1);
         second.events.prepared();
         assertEquals(1, second.starts);
-        assertEquals(0.75f, second.speed, 0f);
         assertEquals(1, videos);
     }
     @Test public void failuresDoNotRetryUntilNewActivation() {
-        session.activate("bad", 0.5f);
+        session.activate("bad");
         FakePlayer first = factory.players.get(0);
         first.events.failed();
         first.events.prepared();
-        session.activate("bad", 0.5f);
+        session.activate("bad");
         assertEquals(1, factory.players.size());
         assertEquals(1, failures);
         assertEquals(0, videos);
         session.deactivate();
-        session.activate("bad", 0.5f);
+        session.activate("bad");
         assertEquals(2, factory.players.size());
     }
     @Test public void timeoutAndLateCallbacksReleaseExactlyOnce() {
-        session.activate("slow", 0.5f);
+        session.activate("slow");
         FakePlayer player = factory.players.get(0);
         timer.fire();
         player.events.failed();
@@ -85,23 +82,23 @@ public class BackgroundSessionTest {
         assertEquals(0, player.starts);
     }
     @Test public void repeatedPreparedAndActivateDoNotStartTwice() {
-        session.activate("video", 2f);
+        session.activate("video");
         FakePlayer player = factory.players.get(0);
         player.events.prepared();
         player.events.prepared();
-        session.activate("video", 2f);
+        session.activate("video");
         assertEquals(1, player.starts);
         assertEquals(1, factory.players.size());
         assertNull(timer.task);
     }
     @Test public void throwingPreparationAndStartFallBack() {
         factory.throwPrepare = true;
-        session.activate("video", 0.5f);
+        session.activate("video");
         assertEquals(1, failures);
         assertEquals(1, factory.players.get(0).releases);
         factory.throwPrepare = false;
         session.deactivate();
-        session.activate("video", 0.5f);
+        session.activate("video");
         FakePlayer player = factory.players.get(1);
         player.throwStart = true;
         player.events.prepared();
@@ -109,11 +106,11 @@ public class BackgroundSessionTest {
         assertEquals(1, player.releases);
     }
     @Test public void emptySourceAndClosedSessionDoNotAllocate() {
-        session.activate("", 0.5f);
+        session.activate("");
         session.deactivate();
         session.close();
         session.close();
-        session.activate("video", 0.5f);
+        session.activate("video");
         assertTrue(factory.players.isEmpty());
     }
 }

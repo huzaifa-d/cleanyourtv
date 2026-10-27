@@ -5,7 +5,7 @@ import java.util.Objects;
 
 final class BackgroundSession {
     interface Player {
-        void prepare(String source, float speed, Events events);
+        void prepare(String source, Events events);
         void start();
         void release();
     }
@@ -22,7 +22,6 @@ final class BackgroundSession {
     private final Runnable still, video, failure;
     private Player player;
     private String source;
-    private float speed;
     private int generation;
     private boolean active, started, closed;
 
@@ -34,18 +33,17 @@ final class BackgroundSession {
         this.video = video;
         this.failure = failure;
     }
-    void activate(String source, float speed) {
-        if (closed || (active && Objects.equals(this.source, source) && this.speed == speed)) return;
+    void activate(String source) {
+        if (closed || (active && Objects.equals(this.source, source))) return;
         deactivate();
         active = true;
         this.source = source;
-        this.speed = speed;
         if (source == null || source.isEmpty()) return;
         int token = generation;
         timer.after(15000, () -> failed(token));
         try {
             player = factory.get();
-            player.prepare(source, speed, new Events() {
+            player.prepare(source, new Events() {
                 @Override public void prepared() {
                     if (token != generation || player == null || started) return;
                     timer.cancel();

@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 final class AuroraSettingsDialog {
-    private static final String[] SPEEDS = {"0.25x", "0.5x", "0.75x", "1x", "1.25x", "1.5x", "1.75x", "2x"};
     private final Activity activity;
     private final AuroraPreferences preferences;
     private final BackgroundFiles files;
@@ -81,8 +80,6 @@ final class AuroraSettingsDialog {
             populateBackground(rows);
             rows.getChildAt(2).requestFocus();
         });
-        Button speed = button(rows, R.string.playback_speed, () -> speed(rows));
-        speed.setText(activity.getString(R.string.speed_value, SPEEDS[Math.round(preferences.speed() * 4) - 1]));
         List<File> available = files.list();
         if (available.isEmpty()) {
             TextView empty = new TextView(activity);
@@ -98,22 +95,12 @@ final class AuroraSettingsDialog {
                 if (files.resolve(file.getName()) == null) { message(R.string.file_missing); return; }
                 preferences.setVideo(file.getName());
                 changed.run();
+                int selectedIndex = rows.indexOfChild(item);
                 populateBackground(rows);
-                rows.getChildAt(3).requestFocus();
+                rows.getChildAt(Math.min(selectedIndex, rows.getChildCount() - 1)).requestFocus();
             });
             rows.addView(item);
         }
-    }
-    private void speed(LinearLayout backgroundRows) {
-        AlertDialog dialog = new AlertDialog.Builder(activity).setTitle(R.string.playback_speed)
-                .setSingleChoiceItems(SPEEDS, Math.round(preferences.speed() * 4) - 1, (choice, index) -> {
-                    preferences.setSpeed((index + 1) / 4f);
-                    changed.run();
-                    choice.dismiss();
-                    populateBackground(backgroundRows);
-                    backgroundRows.getChildAt(3).requestFocus();
-                }).setNegativeButton(android.R.string.cancel, null).create();
-        showPanel(dialog, () -> { });
     }
     private void inputs() {
         InputsController controller = new InputsController(activity);

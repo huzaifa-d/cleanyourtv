@@ -2,7 +2,8 @@ package com.gathin.tvhome;
 
 import static org.junit.Assert.*;
 import android.content.Context;
-import android.media.MediaPlayer;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.View;
@@ -16,6 +17,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import org.junit.After;
 import org.junit.Before;
@@ -50,9 +52,9 @@ public class AuroraPlaybackTest {
             return field.get(owner);
         } catch (ReflectiveOperationException error) { throw new AssertionError(error); }
     }
-    private static MediaPlayer player(AuroraActivity activity) {
+    private static ExoPlayer player(AuroraActivity activity) {
         Object backend = field(field(activity, "background"), "player");
-        return backend == null ? null : (MediaPlayer) field(backend, "player");
+        return backend == null ? null : (ExoPlayer) field(backend, "player");
     }
     private void await(ActivityScenario<AuroraActivity> scene, Predicate<AuroraActivity> condition) {
         AtomicBoolean met = new AtomicBoolean();
@@ -68,18 +70,18 @@ public class AuroraPlaybackTest {
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.isRoot())
                 .perform(androidx.test.espresso.action.ViewActions.pressKey(code));
     }
-    @Test public void localFileLoopsAtHalfSpeedAndReleasesBehindPanelAndStoppedActivity() {
+    @Test public void localFileIgnoresLegacyHalfSpeedAndReleasesBehindPanelAndStoppedActivity() {
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
             await(scene, activity -> activity.findViewById(R.id.background_still).getVisibility() == View.INVISIBLE);
-            AtomicReference<MediaPlayer> first = new AtomicReference<>();
+            AtomicReference<ExoPlayer> first = new AtomicReference<>();
             AtomicReference<AuroraActivity> owner = new AtomicReference<>();
             scene.onActivity(activity -> {
                 owner.set(activity);
                 first.set(player(activity));
                 assertNotNull(first.get());
                 assertTrue(first.get().isPlaying());
-                assertTrue(first.get().isLooping());
-                assertEquals(0.5f, first.get().getPlaybackParams().getSpeed(), 0.01f);
+                assertEquals(Player.REPEAT_MODE_ALL, first.get().getRepeatMode());
+                assertEquals(1f, first.get().getPlaybackParameters().speed, 0.01f);
             });
             SystemClock.sleep(4500);
             scene.onActivity(activity -> {
@@ -119,18 +121,18 @@ public class AuroraPlaybackTest {
         }
     }
 
-    @Test public void bundledBackgroundPlaysAtHalfSpeedAndRestartsAfterPanel() {
+    @Test public void bundledBackgroundDefaultsToOneSpeedAndRestartsAfterPanel() {
         context.getSharedPreferences("aurora", 0).edit().clear().commit();
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
             await(scene, activity -> activity.findViewById(R.id.background_still).getVisibility() == View.INVISIBLE);
-            AtomicReference<MediaPlayer> first = new AtomicReference<>();
-            int[] position = new int[1];
+            AtomicReference<ExoPlayer> first = new AtomicReference<>();
+            long[] position = new long[1];
             scene.onActivity(activity -> {
                 first.set(player(activity));
                 assertNotNull(first.get());
                 assertTrue(first.get().isPlaying());
-                assertTrue(first.get().isLooping());
-                assertEquals(0.5f, first.get().getPlaybackParams().getSpeed(), 0.01f);
+                assertEquals(Player.REPEAT_MODE_ALL, first.get().getRepeatMode());
+                assertEquals(1f, first.get().getPlaybackParameters().speed, 0.01f);
                 assertEquals(12000, first.get().getDuration(), 100);
                 position[0] = first.get().getCurrentPosition();
             });
@@ -146,6 +148,40 @@ public class AuroraPlaybackTest {
             scene.onActivity(activity -> {
                 assertNotSame(first.get(), player(activity));
                 assertTrue(player(activity).isPlaying());
+            });
+        }
+    }
+
+    @Test public void repeatsAtOneSpeedWithoutRebufferingOrReinitializingDecoder() {
+        context.getSharedPreferences("aurora", 0).edit().putFloat("speed", 2f).commit();
+        try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
+            await(scene, activity -> activity.findViewById(R.id.background_still).getVisibility() == View.INVISIBLE);
+            AtomicReference<ExoPlayer> first = new AtomicReference<>();
+            AtomicInteger transitions = new AtomicInteger();
+            AtomicInteger buffering = new AtomicInteger();
+            scene.onActivity(activity -> {
+                ExoPlayer current = player(activity);
+                first.set(current);
+                assertEquals(1f, current.getPlaybackParameters().speed, 0.01f);
+                assertEquals(1, current.getVideoDecoderCounters().decoderInitCount);
+                current.addListener(new Player.Listener() {
+                    @Override public void onMediaItemTransition(androidx.media3.common.MediaItem item, int reason) {
+                        if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) transitions.incrementAndGet();
+                    }
+                    @Override public void onPlaybackStateChanged(int state) {
+                        if (state == Player.STATE_BUFFERING) buffering.incrementAndGet();
+                    }
+                });
+            });
+            await(scene, activity -> transitions.get() >= 3 && player(activity) != null
+                    && player(activity).isPlaying());
+            scene.onActivity(activity -> {
+                assertSame(first.get(), player(activity));
+                assertTrue(player(activity).isPlaying());
+                assertEquals("Unexpected loop rebuffering; decoder initializations="
+                        + player(activity).getVideoDecoderCounters().decoderInitCount, 0, buffering.get());
+                assertEquals(1, player(activity).getVideoDecoderCounters().decoderInitCount);
+                assertEquals(0, player(activity).getVideoDecoderCounters().decoderReleaseCount);
             });
         }
     }

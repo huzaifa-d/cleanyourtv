@@ -17,7 +17,8 @@ final class CreditsDialog {
         text.append("\n\nNative Android Views; adapted from CleanYourTV. No cleanup or package disabling.")
                 .append("\n\nBrand marks belong to their owners. The default background is bundled with permission; custom MP4s remain local.");
         for (String path : new String[] {"notices/UPSTREAM.txt", "notices/THIRD_PARTY_NOTICES.txt", "notices/LICENSE",
-                "aurora/CREDITS.txt", "fonts/OFL.txt"}) {
+                "aurora/CREDITS.txt", "fonts/OFL.txt", "fonts/NotoSansArabic-OFL.txt",
+                "notices/MEDIA3-LICENSE.txt"}) {
             try (InputStream input = activity.getAssets().open(path);
                     ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[4096];

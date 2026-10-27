@@ -39,6 +39,7 @@ public final class AuroraActivity extends Activity {
     private BackgroundFiles files;
     private boolean resumed, windowFocused, surfaceReady, destroyed, defaultVideo, started, screenOn;
     private MemoryCounter memory;
+    private NetworkMonitor network;
     private AuroraSettingsDialog settings;
     private final ExecutorService memoryWorker = Executors.newSingleThreadExecutor();
     private final BroadcastReceiver changes = new BroadcastReceiver() {
@@ -71,6 +72,7 @@ public final class AuroraActivity extends Activity {
         if (state != null) navigation.restore(state.getInt("target", HomeNavigation.IDLE),
                 state.getInt("last_row", 0));
         home = new AuroraHomeView(this, navigation, this::selected);
+        network = new NetworkMonitor(this, main, home::setNetworkStatus);
         preferences = new AuroraPreferences(getSharedPreferences("aurora", MODE_PRIVATE));
         File directory;
         try {
@@ -91,7 +93,7 @@ public final class AuroraActivity extends Activity {
         root.addView(home, new FrameLayout.LayoutParams(-1, -1));
         Handler timeout = new Handler(Looper.getMainLooper());
         background = new BackgroundSession(
-                () -> new MediaPlayerBackend(this, surface.holder(), surface::videoSize),
+                () -> new LoopingVideoBackend(this, surface.holder(), surface::videoSize),
                 new BackgroundSession.Timer() {
                     @Override public void after(long delay, Runnable action) {
                         timeout.postDelayed(action, delay);
@@ -169,9 +171,11 @@ public final class AuroraActivity extends Activity {
             registerReceiver(changes, packages);
         }
         home.updateClock();
+        network.start();
     }
     @Override protected void onStop() {
         started = false;
+        network.stop();
         unregisterReceiver(changes);
         main.removeCallbacks(clockTick);
         super.onStop();
@@ -210,6 +214,7 @@ public final class AuroraActivity extends Activity {
     private void reconcile() {
         if (background == null || destroyed) return;
         main.removeCallbacks(clockTick);
+        home.setGreetingActive(homeActive());
         home.setMemoryVisible(preferences.showRam());
         memory.setEnabled(preferences.showRam());
         memory.setActive(homeActive());
@@ -219,10 +224,11 @@ public final class AuroraActivity extends Activity {
         File selected = selection.isEmpty() ? null : files.resolve(selection);
         String source = selection.isEmpty() ? defaultVideo ? "asset:blue-bokeh.mp4" : ""
                 : selected == null ? "missing:" + selection : selected.getAbsolutePath();
-        background.activate(source, preferences.speed());
+        background.activate(source);
     }
     @Override protected void onDestroy() {
         destroyed = true;
+        home.setGreetingActive(false);
         main.removeCallbacksAndMessages(null);
         background.close();
         memory.close();

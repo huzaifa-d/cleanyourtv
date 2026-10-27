@@ -28,14 +28,13 @@ public class AuroraSettingsTest {
     private void menu() {
         onView(isRoot()).perform(androidx.test.espresso.action.ViewActions.pressKey(KeyEvent.KEYCODE_MENU));
     }
-    @Test public void speedRamAndNestedBackPersistAndRestoreProfile() {
+    @Test public void ramAndNestedBackPersistWithoutSpeedSelectorAndRestoreProfile() {
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
             menu();
             onView(withId(R.id.ram_switch)).check(matches(isChecked())).perform(click());
             onView(withText(R.string.background)).perform(click());
-            onView(withText("Playback speed: 0.5x")).perform(scrollTo(), click());
-            onView(withText("1.75x")).perform(click());
-            onView(withText("Playback speed: 1.75x")).check(matches(isDisplayed()));
+            onView(withText(org.hamcrest.Matchers.startsWith("Playback speed"))).check(doesNotExist());
+            onView(withText(R.string.default_background)).check(matches(isDisplayed()));
             pressBack();
             onView(withId(R.id.ram_switch)).check(matches(isNotChecked()));
             pressBack();
@@ -47,7 +46,8 @@ public class AuroraSettingsTest {
             menu();
             onView(withId(R.id.ram_switch)).check(matches(isNotChecked()));
             onView(withText(R.string.background)).perform(click());
-            onView(withText("Playback speed: 1.75x")).check(matches(isDisplayed()));
+            onView(withText(org.hamcrest.Matchers.startsWith("Playback speed"))).check(doesNotExist());
+            onView(withText(R.string.default_background)).check(matches(isDisplayed()));
             pressBack();
             pressBack();
         }

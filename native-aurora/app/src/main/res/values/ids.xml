@@ -4,6 +4,7 @@
     <item name="ram_switch" type="id" />
     <item type="id" name="home_root" />
     <item type="id" name="profile" />
+    <item type="id" name="greeting" />
     <item type="id" name="netflix" />
     <item type="id" name="prime" />
     <item type="id" name="youtube" />
@@ -12,6 +13,7 @@
     <item type="id" name="apple_tv" />
     <item type="id" name="all_apps" />
     <item type="id" name="clock" />
+    <item type="id" name="network_status" />
     <item type="id" name="memory" />
     <item type="id" name="background_surface" />
 </resources>
