@@ -1,0 +1,16 @@
+<resources>
+    <item name="background_still" type="id" />
+    <item name="app_grid" type="id" />
+    <item name="ram_switch" type="id" />
+    <item type="id" name="home_root" />
+    <item type="id" name="profile" />
+    <item type="id" name="netflix" />
+    <item type="id" name="prime" />
+    <item type="id" name="youtube" />
+    <item type="id" name="disney" />
+    <item type="id" name="hotstar" />
+    <item type="id" name="all_apps" />
+    <item type="id" name="clock" />
+    <item type="id" name="memory" />
+    <item type="id" name="background_surface" />
+</resources>

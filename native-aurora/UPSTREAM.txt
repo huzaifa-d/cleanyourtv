@@ -1,0 +1,25 @@
+Aurora Native
+
+Foundation: https://github.com/Gathin23/cleanyourtv
+Pinned revision: 76a9312cd9ac378fc8698f31427805af32c6f965
+Copyright (c) 2026 Gathin. MIT licence in THIRD_PARTY_NOTICES.txt.
+
+The Gradle wrapper, build configuration foundation and Android application
+structure are adapted from launcher/ at this revision.
+LibraryLoads.java, MemoryTrimPolicy.java and their JVM tests are retained.
+AppCatalog and AppLibraryDialog adapt AppLibraryDialog.java's dual-category
+query precedence, worker-thread artwork loading, current-generation checks
+and recycled-view icon guards. The renderer is changed to Aurora's grid;
+upstream home-editing and theme features are not included.
+SystemSettings adapts the standard settings-intent resolution. InputsController
+adapts MainActivity's TvInputManager discovery and channel-intent construction,
+with passthrough and tuner intents separated. Sony package fallbacks come from
+the upstream Sony examples; other vendor-specific source mappings are omitted.
+No upstream setup, cleanup or package-disabling scripts are executed.
+
+Visual design, artwork and optional private media originate in the Neons
+Aurora implementation at 461d9d77d75e36c3febb103d4e87eeb4476ba497.
+The imported Aurora implementation retains the GTvLauncher GPLv3 licence in
+native-aurora/LICENSE; it is not relicensed under the upstream repository's MIT
+licence. The original CleanYourTV launcher and tools remain unchanged under
+their existing licence. See native-aurora/assets/aurora/CREDITS.txt for artwork.

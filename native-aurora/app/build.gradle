@@ -1,0 +1,64 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.gathin.tvhome'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.huzaifa.aurora.nativehome'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Personal sideload builds, not a production distribution key.
+            signingConfig signingConfigs.debug
+        }
+    }
+    testOptions {
+        unitTests.returnDefaultValues = false
+    }
+    androidResources {
+        noCompress += ['mp4']
+    }
+}
+
+def generatedAssets = layout.buildDirectory.dir('generated/auroraAssets')
+def referenceAssets = rootProject.file('assets')
+def prepareAuroraAssets = tasks.register('prepareAuroraAssets', Sync) {
+    from(new File(referenceAssets, 'aurora')) {
+        include 'icons/*.png', 'aurora-i-4k.jpg', 'CREDITS.txt', 'blue-bokeh.mp4'
+        into 'aurora'
+    }
+    from(new File(referenceAssets, 'fonts')) {
+        include 'Roboto.ttf', 'OFL.txt'
+        into 'fonts'
+    }
+    from(rootProject.projectDir) {
+        include 'THIRD_PARTY_NOTICES.txt', 'UPSTREAM.txt', 'LICENSE'
+        into 'notices'
+    }
+    into generatedAssets
+}
+android.sourceSets.main.assets.srcDir(generatedAssets)
+tasks.named('preBuild').configure { dependsOn prepareAuroraAssets }
+
+dependencies {
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
+}

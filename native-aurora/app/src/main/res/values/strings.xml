@@ -1,0 +1,31 @@
+<resources>
+    <string name="no_apps">No launchable apps were found or access is unavailable.</string>
+    <string name="background">Background</string>
+    <string name="show_ram">Show RAM counter</string>
+    <string name="inputs">HDMI / Inputs</string>
+    <string name="live_tv">Live TV</string>
+    <string name="system_settings">System settings</string>
+    <string name="app_management">App management</string>
+    <string name="about">About and credits</string>
+    <string name="background_directory">Copy MP4 files to:\n%1$s\n\nSelected: %2$s\n\nUninstalling Aurora Native deletes copied backgrounds, not your PC originals.</string>
+    <string name="storage_unavailable">App-owned storage is unavailable on this device.</string>
+    <string name="default_background">Default background</string>
+    <string name="refresh">Refresh files</string>
+    <string name="playback_speed">Playback speed</string>
+    <string name="speed_value">Playback speed: %1$s</string>
+    <string name="no_background_files">No MP4 files found. Copy a complete .mp4 file into the directory above, then Refresh files. Incomplete .part transfers are ignored.</string>
+    <string name="file_missing">That file disappeared. Your previous selection has been kept.</string>
+    <string name="no_inputs">No TV inputs were reported. Open system settings to choose a source on this TV.</string>
+    <string name="input_unavailable">This input could not be opened. Try system settings instead.</string>
+    <string name="settings_unavailable">System settings are unavailable or blocked on this device.</string>
+    <string name="app_name">Aurora Native</string>
+    <string name="profile_settings">Profile and settings</string>
+    <string name="good_morning">Good morning, Maahi</string>
+    <string name="good_afternoon">Good afternoon, Maahi</string>
+    <string name="good_evening">Good evening, Maahi</string>
+    <string name="all_apps">All Apps</string>
+    <string name="cannot_open">Could not open %1$s</string>
+    <string name="not_installed">%1$s is not installed</string>
+    <string name="video_failed">Could not play the background at this speed. Using the still wallpaper; choose another video or speed in settings.</string>
+    <string name="memory_unavailable">App RAM (PSS) unavailable\nTV RAM unavailable</string>
+</resources>

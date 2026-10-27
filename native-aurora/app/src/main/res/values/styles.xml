@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.Aurora" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">#171B35</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#0779FF</item>
+    </style>
+</resources>

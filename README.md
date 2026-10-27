@@ -1,3 +1,18 @@
+## Aurora Native fork
+
+This independent fork adds [Aurora Native](native-aurora/README.md): a minimal
+Java / Android Views home with monochrome shortcuts, colour on focus, looping
+MP4 backgrounds, adjustable speed (default 0.5x) and an optional RAM counter.
+Get its sideload APK from [this fork's releases](https://github.com/huzaifa-d/cleanyourtv/releases).
+It installs alongside the original launcher without running cleanup or changing
+default Home. Sony hardware compatibility and memory savings remain unverified.
+
+The original `launcher/`, cleanup tools and upstream MIT licence are unchanged;
+the imported Aurora module retains its own [GPLv3 licence](native-aurora/LICENSE).
+The README below describes the upstream project, not Aurora.
+
+---
+
 <p align="center">
   <a href="https://cleanyour.tv"><img src="https://raw.githubusercontent.com/Gathin23/cleanyourtv/main/docs/banner.png" alt="CleanYourTV. Your TV, minus the ads. Strip the bloatware from any Android TV or Google TV over Wi-Fi and replace the ad-filled home screen with a clean launcher that looks like an Apple TV. No root, no cable, nothing uninstalled, and a one-line restore." width="800"></a>
 </p>
