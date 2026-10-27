@@ -10,8 +10,8 @@ android {
         applicationId 'com.huzaifa.aurora.nativehome'
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        versionCode 2
+        versionName '1.1'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     compileOptions {
@@ -39,7 +39,7 @@ def generatedAssets = layout.buildDirectory.dir('generated/auroraAssets')
 def referenceAssets = rootProject.file('assets')
 def prepareAuroraAssets = tasks.register('prepareAuroraAssets', Sync) {
     from(new File(referenceAssets, 'aurora')) {
-        include 'icons/*.png', 'aurora-i-4k.jpg', 'CREDITS.txt', 'blue-bokeh.mp4'
+        include 'icons/*.png', 'aurora-i-4k.jpg', 'CREDITS.txt', 'APPLE_TV_LEGAL_NOTICE.rtf', 'blue-bokeh.mp4'
         into 'aurora'
     }
     from(new File(referenceAssets, 'fonts')) {

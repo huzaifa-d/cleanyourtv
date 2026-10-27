@@ -21,12 +21,11 @@ import java.util.function.IntConsumer;
 
 final class AuroraHomeView extends FrameLayout {
     static final int[] TILE_IDS = {
-        R.id.netflix, R.id.prime, R.id.youtube, R.id.disney, R.id.hotstar, R.id.all_apps
+        R.id.netflix, R.id.prime, R.id.youtube, R.id.disney, R.id.hotstar, R.id.apple_tv, R.id.all_apps
     };
     private final FrameLayout composition;
-    private final View[] tiles = new View[6];
-    private final ImageView[] marks = new ImageView[6];
-    private final Bitmap[][] logos = new Bitmap[5][2];
+    private final View[] tiles = new View[BrandShortcut.values().length];
+    private final Bitmap[][] logos = new Bitmap[BrandShortcut.values().length][2];
     private final ImageView profile;
     private final TextView greeting, clock, memory;
     private final Typeface typeface;
@@ -40,6 +39,7 @@ final class AuroraHomeView extends FrameLayout {
         typeface = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto.ttf");
         composition = new FrameLayout(context);
         composition.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+        composition.setClipChildren(false);
         composition.setId(R.id.home_root);
         composition.setFocusable(true);
         composition.setFocusableInTouchMode(true);
@@ -80,6 +80,8 @@ final class AuroraHomeView extends FrameLayout {
         for (BrandShortcut brand : BrandShortcut.values()) {
             int index = brand.ordinal();
             FrameLayout tile = new FrameLayout(context);
+            tile.setClipChildren(false);
+            tile.setClipToPadding(false);
             tile.setId(TILE_IDS[index]);
             tile.setFocusable(true);
             tile.setFocusableInTouchMode(true);
@@ -87,21 +89,23 @@ final class AuroraHomeView extends FrameLayout {
             tile.setOnClickListener(v -> selected.accept(index));
             ImageView mark = new ImageView(context);
             mark.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            if (index < 5) {
+            mark.setScaleX(1.5f);
+            mark.setScaleY(1.5f);
+            if (brand != BrandShortcut.ALL) {
                 logos[index][0] = decode("aurora/icons/" + brand.assetStem + "-white.png", 256);
                 logos[index][1] = decode("aurora/icons/" + brand.assetStem + "-colour.png", 256);
                 mark.setImageBitmap(logos[index][0]);
             } else mark.setImageResource(R.drawable.aurora_apps);
             tile.addView(mark, new FrameLayout.LayoutParams(brand.width, brand.height, Gravity.CENTER));
             tiles[index] = tile;
-            marks[index] = mark;
             tile.setOnFocusChangeListener((v, focused) -> {
-                tile.setBackground(frame(focused, false));
-                if (index < 5) mark.setImageBitmap(logos[index][focused ? 1 : 0]);
+                mark.setScaleX(focused ? 2f : 1.5f);
+                mark.setScaleY(focused ? 2f : 1.5f);
+                if (brand != BrandShortcut.ALL) mark.setImageBitmap(logos[index][focused ? 1 : 0]);
                 else mark.setImageTintList(ColorStateList.valueOf(focused ? 0xFF0779FF : Color.WHITE));
                 if (focused) navigation.select(index);
             });
-            composition.addView(tile, position(65, 88, Math.round(181 + index * 106.6f), 412));
+            composition.addView(tile, position(112, 112, 64 + index * 120, 390));
         }
         memory = text(9f);
         memory.setId(R.id.memory);

@@ -22,12 +22,18 @@ https://upload.wikimedia.org/wikipedia/commons/a/a4/Disney%2B_2024_%28Print%29.s
 https://static.wikia.nocookie.net/logopedia/images/f/f8/Disney%2B_%282024%29.svg/revision/latest?cb=20240325192610
 JioHotstar star, extracted from the official embedded artwork:
 https://img10.hotstar.com/image/upload/v1737554969/web-assets/prod/images/rebrand/logo.svg
+Apple TV, white silhouette and pearlescent mark from Apple's 3600px hero logo:
+https://www.apple.com/tv-pr/about-assets/images/logo/Apple_TV_Logo.zip
+Transparent PNGs prepared for this personal, non-commercial launcher.
+Apple's accompanying notice is retained in aurora/APPLE_TV_LEGAL_NOTICE.rtf.
 These marks belong to their respective owners. No brand permission or open
 licence is asserted. All Apps and profile use native vector glyphs.
 
 Default video: Blue Bokeh.mp4, supplied by the user.
-The bundled aurora/blue-bokeh.mp4 is the unchanged 4K/30 AV1 original,
-muted and looped at a default 0.5x (24 seconds per 12-second source loop).
+The bundled aurora/blue-bokeh.mp4 is a 1920x1080/30 H.264 (yuv420p) copy,
+transcoded from the supplied 4K AV1 original for broader decoder compatibility.
+It has no audio and loops at a default 0.5x (24 seconds per 12-second source loop).
+The source file on the user's PC is unchanged. No runtime transcoding occurs.
 The user confirmed ownership or permission to redistribute this video
 in this public fork and its APK. No additional open artwork license is asserted.
 Unsupported playback retains the still wallpaper. Custom MP4s stay local.

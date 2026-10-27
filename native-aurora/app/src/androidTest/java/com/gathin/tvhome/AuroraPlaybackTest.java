@@ -118,4 +118,35 @@ public class AuroraPlaybackTest {
                             androidx.test.espresso.matcher.ViewMatchers.isDisplayed()));
         }
     }
+
+    @Test public void bundledBackgroundPlaysAtHalfSpeedAndRestartsAfterPanel() {
+        context.getSharedPreferences("aurora", 0).edit().clear().commit();
+        try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
+            await(scene, activity -> activity.findViewById(R.id.background_still).getVisibility() == View.INVISIBLE);
+            AtomicReference<MediaPlayer> first = new AtomicReference<>();
+            int[] position = new int[1];
+            scene.onActivity(activity -> {
+                first.set(player(activity));
+                assertNotNull(first.get());
+                assertTrue(first.get().isPlaying());
+                assertTrue(first.get().isLooping());
+                assertEquals(0.5f, first.get().getPlaybackParams().getSpeed(), 0.01f);
+                assertEquals(12000, first.get().getDuration(), 100);
+                position[0] = first.get().getCurrentPosition();
+            });
+            SystemClock.sleep(1200);
+            scene.onActivity(activity -> {
+                assertSame(first.get(), player(activity));
+                assertTrue(first.get().getCurrentPosition() > position[0]);
+            });
+            key(KeyEvent.KEYCODE_MENU);
+            scene.onActivity(activity -> assertNull(player(activity)));
+            key(KeyEvent.KEYCODE_BACK);
+            await(scene, activity -> activity.findViewById(R.id.background_still).getVisibility() == View.INVISIBLE);
+            scene.onActivity(activity -> {
+                assertNotSame(first.get(), player(activity));
+                assertTrue(player(activity).isPlaying());
+            });
+        }
+    }
 }

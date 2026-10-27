@@ -39,13 +39,16 @@ Release builds use R8/resource shrinking and the local Android debug signing key
 for personal sideloading, **not a production distribution key**. Updates require
 the same signing key.
 
-Artwork/fonts are staged from this module's `assets` folder. The unchanged
+Artwork/fonts are staged from this module's `assets` folder. The
 `native-aurora\assets\aurora\blue-bokeh.mp4` is included in source and the APK,
 so builds do not need an untracked private file. The user confirmed ownership
 or permission to redistribute both supplied backgrounds in this public fork
 and its APK. This does not grant an additional open artwork licence or rights
 to the brand marks; see `assets\aurora\CREDITS.txt`.
-Nothing downloads or transcodes the video. Builds without the MP4, or devices
+The bundled default is a 1080p/30 H.264 copy of Blue Bokeh, transcoded offline
+from the 4K AV1 original for broader playback compatibility. The original PC
+file is unchanged. Nothing downloads or transcodes video at runtime.
+Builds without the MP4, or devices
 that cannot decode it, retain the still wallpaper.
 
 ## Install and provide an MP4
@@ -103,7 +106,10 @@ The PC originals and Neons are unaffected.
 | Back in panel | Close that panel |
 | Back on Home | Clear selection |
 
-Branded shortcuts are white at rest and colour on focus. All Apps is labelled
+The row is Netflix, Prime, YouTube, Disney+, JioHotstar, Apple TV and All Apps.
+Branded shortcuts are white at rest at 1.5x the original artwork dimensions.
+Focus uses the brand artwork at 2x original size, with no selection box or fill.
+Apple TV uses Apple's pearlescent mark on focus. All Apps is labelled
 and scrollable. Missing applications show a message, never a store redirect.
 The clock uses the device's timezone and 12/24-hour preference.
 
@@ -112,7 +118,7 @@ App management and About/credits. Inputs use Android TV channel intents and
 Sony fallbacks; they do not remap physical remote keys.
 
 Background speed choices are **0.25x through 2x in 0.25x steps**, initially
-**0.5x**. The unchanged 12-second Blue Bokeh source therefore has a 24-second
+**0.5x**. The 12-second Blue Bokeh source therefore has a 24-second
 loop at the default speed. Selection, speed and RAM visibility persist across
 restarts and in-place updates. **Default background** resets the source, not the
 chosen speed.
@@ -145,7 +151,7 @@ passed 28 JVM tests and 12 Android UI/playback tests on an isolated Android 14
 TV / 1080p emulator. The relocated module is rebuilt with its JVM tests and
 release lint (zero errors; advisory warnings remain). APK auditing checks for
 permissions, Flutter runtime and test media, verifies the signature, and checks
-the unchanged default video's hash.
+the bundled default video's format and hash.
 
 An emulator cannot establish Sony remote/input compatibility, 4K AV1 decoder
 behaviour, supported speeds, loop quality or real RAM savings.

@@ -115,12 +115,12 @@ public final class AuroraActivity extends Activity {
             settings.show(() -> { if (!destroyed) home.applyFocus(HomeNavigation.PROFILE); });
             return;
         }
-        if (target == 5) {
+        if (target == BrandShortcut.ALL.ordinal()) {
             if (library.isShowing()) return;
             Runnable dismissed = beginPanel();
             library.show(home, () -> {
                 dismissed.run();
-                if (!destroyed) home.applyFocus(5);
+                if (!destroyed) home.applyFocus(BrandShortcut.ALL.ordinal());
             });
             return;
         }

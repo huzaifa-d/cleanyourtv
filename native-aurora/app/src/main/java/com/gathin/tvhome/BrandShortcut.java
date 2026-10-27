@@ -8,6 +8,8 @@ enum BrandShortcut {
             "com.teamsmart.videomanager.tv", "com.teamsmart.videomanager.tv.beta"),
     DISNEY("Disney+", "disney", 60, 34, "com.disney.disneyplus"),
     HOTSTAR("JioHotstar", "hotstar", 44, 40, "in.startv.hotstar", "in.startv.hotstar.dplus"),
+    APPLE_TV("Apple TV", "apple-tv", 50, 26,
+            "com.apple.atve.androidtv", "com.apple.atve.androidtv.appletv"),
     ALL("All Apps", "", 25, 25);
 
     final String label, assetStem;
