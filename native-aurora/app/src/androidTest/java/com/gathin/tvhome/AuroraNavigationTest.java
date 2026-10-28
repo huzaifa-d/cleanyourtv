@@ -77,7 +77,7 @@ public class AuroraNavigationTest {
                     KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_LEFT};
             for (int step = 0; step < order.length; step++) {
                 key(keys[step]);
-                SystemClock.sleep(300);
+                SystemClock.sleep(850);
                 final int current = order[step];
                 scene.onActivity(activity -> {
                     BlossomTile tile = activity.findViewById(ids[current]);

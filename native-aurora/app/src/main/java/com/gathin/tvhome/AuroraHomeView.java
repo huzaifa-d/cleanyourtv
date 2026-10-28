@@ -196,9 +196,9 @@ final class AuroraHomeView extends FrameLayout {
             BlossomTile tile = tiles[index];
             ImageView mark = tile.mark;
             if (brand == BrandShortcut.ALL) {
-                ((OutputResolutionIconView) mark).setOutputScale(scale * BlossomTile.FOCUS_SCALE);
+                ((OutputResolutionIconView) mark).setOutputScale(scale * BlossomTile.MAX_FOCUS_SCALE);
             } else {
-                int width = (int) Math.ceil(mark.getLayoutParams().width * BlossomTile.FOCUS_SCALE * scale);
+                int width = (int) Math.ceil(mark.getLayoutParams().width * BlossomTile.MAX_FOCUS_SCALE * scale);
                 tile.setLogos(decode("aurora/icons/" + brand.assetStem + "-white.png", width),
                         decode("aurora/icons/" + brand.assetStem + "-colour.png", width));
             }
@@ -214,6 +214,7 @@ final class AuroraHomeView extends FrameLayout {
     void setHomeActive(boolean active) {
         setGreetingActive(active);
         petals.setActive(active);
+        for (BlossomTile tile : tiles) tile.setActive(active);
     }
     void setGreetingActive(boolean active) {
         if (greetingActive == active) return;

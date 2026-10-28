@@ -46,8 +46,8 @@ public class AuroraIconResolutionTest {
                 assertEquals((int) Math.ceil(17 * scale), bitmap(profile).getWidth());
                 assertEquals((int) Math.ceil(17 * scale), bitmap(profile).getHeight());
                 ImageView all = apps(home);
-                assertEquals((int) Math.ceil(all.getWidth() * 1.14f * scale), bitmap(all).getWidth());
-                assertEquals((int) Math.ceil(all.getHeight() * 1.14f * scale), bitmap(all).getHeight());
+                assertEquals((int) Math.ceil(all.getWidth() * 1.17f * scale), bitmap(all).getWidth());
+                assertEquals((int) Math.ceil(all.getHeight() * 1.17f * scale), bitmap(all).getHeight());
                 for (NetworkMonitor.Status status : NetworkMonitor.Status.values()) {
                     home.setNetworkStatus(status);
                     ImageView network = home.findViewById(R.id.network_status);
@@ -75,13 +75,13 @@ public class AuroraIconResolutionTest {
                 ImageView mark = ((BlossomTile) home.findViewById(
                         AuroraHomeView.TILE_IDS[brand.ordinal()])).mark;
                 assertTrue(brand.label + " is being enlarged beyond its decoded pixels",
-                        bitmap(mark).getWidth() >= mark.getWidth() * 1.14f * 4);
+                        bitmap(mark).getWidth() >= mark.getWidth() * 1.17f * 4);
                 Bitmap idle = bitmap(mark);
                 home.applyFocus(brand.ordinal());
                 assertTrue(home.findViewById(AuroraHomeView.TILE_IDS[brand.ordinal()]).hasFocus());
                 assertNotSame(idle, bitmap(mark));
                 assertTrue(brand.label + " focused artwork also needs output-resolution pixels",
-                        bitmap(mark).getWidth() >= mark.getWidth() * 1.14f * 4);
+                        bitmap(mark).getWidth() >= mark.getWidth() * 1.17f * 4);
                 if (brand == BrandShortcut.DISNEY) {
                     Bitmap focused = bitmap(mark);
                     boolean gradient = false;

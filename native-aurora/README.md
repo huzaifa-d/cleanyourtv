@@ -13,7 +13,7 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 | Application ID | `com.huzaifa.aurora.nativehome` |
 | Activity | `com.gathin.tvhome.AuroraActivity` |
 | Minimum Android | 8.0 / API 26 |
-| Version | 1.4 / code 5 |
+| Version | 1.5 / code 6 |
 | Local checkout | `A:\Repos\CleanYourTV.CherryBlossom` |
 | Fork / branch | `huzaifa-d/cleanyourtv` / `Cherry-BLossom` |
 
@@ -113,13 +113,18 @@ Apple TV, JioHotstar and All Apps. Down maps the four upper shortcuts to
 Apple TV, Apple TV, JioHotstar and All Apps; Up maps the lower shortcuts to
 Netflix, YouTube and Disney+. Down at the bottom and horizontal row edges stop.
 Seven differently angled blossoms carry upright white marks at rest.
-Focus grows the blossom to 1.14x, gently turns only its flower another 8 degrees
-and changes the logo to brand colours, with no selection box or fill.
+Focus grows the blossom to 1.17x over 280 ms, then softly settles to 1.14x over
+420 ms, with a faint warm inner pulse that fades away. This approved G5 effect
+plays once per focus change, never on a loop. The flower still turns another
+8 degrees and its upright logo changes to brand colours immediately, with no
+selection box or persistent fill. Rapid focus changes cancel the old effect;
+panels, inactive Home and detach cancel animations and remove the pulse.
+System-disabled animation applies the final focus state without motion.
 Disney+ uses the full pre-2024 dark-blue wordmark and blue/cyan gradient arc.
 Apple TV uses Apple's pearlescent mark on focus. All Apps is labelled
 and scrollable. Missing applications show a message, never a store redirect.
 Native home glyphs are rasterised at output resolution, including All Apps'
-maximum focus size. Brand images are decoded for that same focused output size,
+maximum 1.17x focus size. Brand images are decoded for that same peak output size,
 bounded by the original asset resolution. Library icons use their displayed
 pixel dimensions and a size-aware cache.
 The clock uses the device's timezone and 12/24-hour preference.
