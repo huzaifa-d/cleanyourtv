@@ -16,4 +16,5 @@
     <item type="id" name="network_status" />
     <item type="id" name="memory" />
     <item type="id" name="background_surface" />
+    <item type="id" name="petals" />
 </resources>

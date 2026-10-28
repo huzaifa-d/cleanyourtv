@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -33,7 +33,7 @@ public class AuroraIconResolutionTest {
     }
 
     private static ImageView apps(AuroraHomeView home) {
-        return (ImageView) ((ViewGroup) home.findViewById(R.id.all_apps)).getChildAt(0);
+        return ((BlossomTile) home.findViewById(R.id.all_apps)).mark;
     }
 
     @Test public void nativeIconsCoverOutputPixelsIncludingFocusAndReuseUnchangedRasters() {
@@ -46,8 +46,8 @@ public class AuroraIconResolutionTest {
                 assertEquals((int) Math.ceil(17 * scale), bitmap(profile).getWidth());
                 assertEquals((int) Math.ceil(17 * scale), bitmap(profile).getHeight());
                 ImageView all = apps(home);
-                assertEquals((int) Math.ceil(25 * 2 * scale), bitmap(all).getWidth());
-                assertEquals((int) Math.ceil(25 * 2 * scale), bitmap(all).getHeight());
+                assertEquals((int) Math.ceil(all.getWidth() * 1.14f * scale), bitmap(all).getWidth());
+                assertEquals((int) Math.ceil(all.getHeight() * 1.14f * scale), bitmap(all).getHeight());
                 for (NetworkMonitor.Status status : NetworkMonitor.Status.values()) {
                     home.setNetworkStatus(status);
                     ImageView network = home.findViewById(R.id.network_status);
@@ -72,16 +72,31 @@ public class AuroraIconResolutionTest {
             layout(home, 3840, 2160);
             for (BrandShortcut brand : BrandShortcut.values()) {
                 if (brand == BrandShortcut.ALL) continue;
-                ImageView mark = (ImageView) ((ViewGroup) home.findViewById(
-                        AuroraHomeView.TILE_IDS[brand.ordinal()])).getChildAt(0);
+                ImageView mark = ((BlossomTile) home.findViewById(
+                        AuroraHomeView.TILE_IDS[brand.ordinal()])).mark;
                 assertTrue(brand.label + " is being enlarged beyond its decoded pixels",
-                        bitmap(mark).getWidth() >= brand.width * 2 * 4);
+                        bitmap(mark).getWidth() >= mark.getWidth() * 1.14f * 4);
                 Bitmap idle = bitmap(mark);
                 home.applyFocus(brand.ordinal());
                 assertTrue(home.findViewById(AuroraHomeView.TILE_IDS[brand.ordinal()]).hasFocus());
                 assertNotSame(idle, bitmap(mark));
                 assertTrue(brand.label + " focused artwork also needs output-resolution pixels",
-                        bitmap(mark).getWidth() >= brand.width * 2 * 4);
+                        bitmap(mark).getWidth() >= mark.getWidth() * 1.14f * 4);
+                if (brand == BrandShortcut.DISNEY) {
+                    Bitmap focused = bitmap(mark);
+                    boolean gradient = false;
+                    for (int y = 0; y < focused.getHeight() && !gradient; y++) {
+                        for (int x = 0; x < focused.getWidth(); x++) {
+                            int pixel = focused.getPixel(x, y);
+                            if (Color.alpha(pixel) > 128 && Color.blue(pixel) > 180
+                                    && Color.green(pixel) > 60 && Color.red(pixel) < 80) {
+                                gradient = true;
+                                break;
+                            }
+                        }
+                    }
+                    assertTrue("The full old Disney+ logo must retain its blue/cyan gradient arc", gradient);
+                }
             }
         });
     }

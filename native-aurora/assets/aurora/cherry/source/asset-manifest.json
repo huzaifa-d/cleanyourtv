@@ -1,0 +1,87 @@
+{
+  "source": "Petals.png",
+  "source_sha256": "4b94dc1921a8350a3af538df41acfe8f7a0f604e5f5328964b06af4355374cfa",
+  "source_size": [
+    1313,
+    1198
+  ],
+  "assets": [
+    {
+      "name": "blossom",
+      "native_content_size": [
+        649,
+        597
+      ],
+      "export_size": [
+        673,
+        621
+      ]
+    },
+    {
+      "name": "petal-1",
+      "native_content_size": [
+        331,
+        209
+      ],
+      "export_size": [
+        355,
+        233
+      ]
+    },
+    {
+      "name": "petal-2",
+      "native_content_size": [
+        348,
+        189
+      ],
+      "export_size": [
+        372,
+        213
+      ]
+    },
+    {
+      "name": "petal-3",
+      "native_content_size": [
+        353,
+        195
+      ],
+      "export_size": [
+        377,
+        219
+      ]
+    },
+    {
+      "name": "petal-4",
+      "native_content_size": [
+        315,
+        216
+      ],
+      "export_size": [
+        339,
+        240
+      ]
+    },
+    {
+      "name": "petal-5",
+      "native_content_size": [
+        330,
+        226
+      ],
+      "export_size": [
+        354,
+        250
+      ]
+    },
+    {
+      "name": "petal-6",
+      "native_content_size": [
+        343,
+        198
+      ],
+      "export_size": [
+        367,
+        222
+      ]
+    }
+  ]
+}

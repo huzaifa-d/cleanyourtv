@@ -1,7 +1,6 @@
 package com.gathin.tvhome;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -26,8 +25,8 @@ final class AuroraHomeView extends FrameLayout {
         R.id.netflix, R.id.prime, R.id.youtube, R.id.disney, R.id.hotstar, R.id.apple_tv, R.id.all_apps
     };
     private final FrameLayout composition;
-    private final View[] tiles = new View[BrandShortcut.values().length];
-    private final Bitmap[][] logos = new Bitmap[BrandShortcut.values().length][2];
+    private final BlossomTile[] tiles = new BlossomTile[BrandShortcut.values().length];
+    private final PetalView petals;
     private final OutputResolutionIconView profile;
     private final TextView greeting, clock, memory;
     private final Typeface typeface, urduTypeface;
@@ -70,12 +69,16 @@ final class AuroraHomeView extends FrameLayout {
         still = new ImageView(context);
         still.setId(R.id.background_still);
         still.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        still.setImageBitmap(decode("aurora/aurora-i-4k.jpg", 1280));
+        still.setImageBitmap(decode("aurora/cherry-blossom.jpg", 2000));
         composition.addView(still, position(960, 540, 0, 0));
         View shade = new View(context);
         shade.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[] {0x20000000, Color.TRANSPARENT, 0x4D000000}));
+                new int[] {0x33000000, Color.TRANSPARENT, Color.TRANSPARENT,
+                    Color.TRANSPARENT, 0x11000000}));
         composition.addView(shade, position(960, 540, 0, 0));
+        petals = new PetalView(context);
+        petals.setId(R.id.petals);
+        composition.addView(petals, position(960, 540, 0, 0));
 
         profile = new OutputResolutionIconView(context);
         profile.setId(R.id.profile);
@@ -112,32 +115,19 @@ final class AuroraHomeView extends FrameLayout {
         composition.addView(clockGroup, position(210, 25, 696, 37));
         setNetworkStatus(NetworkMonitor.Status.OFFLINE);
 
+        Bitmap blossom = decode("aurora/cherry/blossom.png", 673);
+        int[][] centres = {{134, 178}, {346, 146}, {557, 189}, {768, 157},
+                {470, 319}, {230, 335}, {720, 346}};
+        int[] angles = {-28, 46, -84, 118, -142, 76, 164};
         for (BrandShortcut brand : BrandShortcut.values()) {
             int index = brand.ordinal();
-            FrameLayout tile = new FrameLayout(context);
-            tile.setClipChildren(false);
-            tile.setClipToPadding(false);
+            BlossomTile tile = new BlossomTile(context, brand, blossom, angles[index],
+                    () -> navigation.select(index));
             tile.setId(TILE_IDS[index]);
-            tile.setFocusable(true);
-            tile.setFocusableInTouchMode(true);
-            tile.setContentDescription(brand.label);
             tile.setOnClickListener(v -> selected.accept(index));
-            ImageView mark = brand == BrandShortcut.ALL
-                    ? new OutputResolutionIconView(context) : new ImageView(context);
-            mark.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            mark.setScaleX(1.5f);
-            mark.setScaleY(1.5f);
-            if (brand == BrandShortcut.ALL) mark.setImageResource(R.drawable.aurora_apps);
-            tile.addView(mark, new FrameLayout.LayoutParams(brand.width, brand.height, Gravity.CENTER));
             tiles[index] = tile;
-            tile.setOnFocusChangeListener((v, focused) -> {
-                mark.setScaleX(focused ? 2f : 1.5f);
-                mark.setScaleY(focused ? 2f : 1.5f);
-                if (brand != BrandShortcut.ALL) mark.setImageBitmap(logos[index][focused ? 1 : 0]);
-                else mark.setImageTintList(ColorStateList.valueOf(focused ? 0xFF0779FF : Color.WHITE));
-                if (focused) navigation.select(index);
-            });
-            composition.addView(tile, position(112, 112, 64 + index * 120, 390));
+            composition.addView(tile, position(BlossomTile.SIZE, BlossomTile.SIZE,
+                    centres[index][0] - BlossomTile.SIZE / 2, centres[index][1] - BlossomTile.SIZE / 2));
         }
         memory = text(9f);
         memory.setId(R.id.memory);
@@ -203,14 +193,14 @@ final class AuroraHomeView extends FrameLayout {
         network.setOutputScale(scale);
         for (BrandShortcut brand : BrandShortcut.values()) {
             int index = brand.ordinal();
-            ImageView mark = (ImageView) ((FrameLayout) tiles[index]).getChildAt(0);
+            BlossomTile tile = tiles[index];
+            ImageView mark = tile.mark;
             if (brand == BrandShortcut.ALL) {
-                ((OutputResolutionIconView) mark).setOutputScale(scale * 2f);
+                ((OutputResolutionIconView) mark).setOutputScale(scale * BlossomTile.FOCUS_SCALE);
             } else {
-                int width = (int) Math.ceil(brand.width * 2f * scale);
-                logos[index][0] = decode("aurora/icons/" + brand.assetStem + "-white.png", width);
-                logos[index][1] = decode("aurora/icons/" + brand.assetStem + "-colour.png", width);
-                mark.setImageBitmap(logos[index][tiles[index].hasFocus() ? 1 : 0]);
+                int width = (int) Math.ceil(mark.getLayoutParams().width * BlossomTile.FOCUS_SCALE * scale);
+                tile.setLogos(decode("aurora/icons/" + brand.assetStem + "-white.png", width),
+                        decode("aurora/icons/" + brand.assetStem + "-colour.png", width));
             }
         }
     }
@@ -221,6 +211,10 @@ final class AuroraHomeView extends FrameLayout {
         else tiles[target].requestFocus();
     }
     void setMemoryText(String reading) { memory.setText(reading); }
+    void setHomeActive(boolean active) {
+        setGreetingActive(active);
+        petals.setActive(active);
+    }
     void setGreetingActive(boolean active) {
         if (greetingActive == active) return;
         greetingActive = active;

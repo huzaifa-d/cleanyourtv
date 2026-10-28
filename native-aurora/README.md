@@ -1,7 +1,7 @@
 # Aurora Native
 
 Standalone Java / Android Views adaptation of CleanYourTV, pinned to
-`76a9312cd9ac378fc8698f31427805af32c6f965`, with the approved minimal Aurora home.
+`76a9312cd9ac378fc8698f31427805af32c6f965`, with the approved Cherry Blossom home.
 Imported from the native Aurora implementation in `huzaifa-d/GTvLauncher`;
 there is no Flutter project or runtime in this module.
 See `UPSTREAM.txt`, `THIRD_PARTY_NOTICES.txt` and this module's GPLv3 `LICENSE`.
@@ -13,8 +13,9 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 | Application ID | `com.huzaifa.aurora.nativehome` |
 | Activity | `com.gathin.tvhome.AuroraActivity` |
 | Minimum Android | 8.0 / API 26 |
-| Local checkout | `A:\Repos\CleanYourTV` |
-| Fork / branch | `huzaifa-d/cleanyourtv` / `main` |
+| Version | 1.4 / code 5 |
+| Local checkout | `A:\Repos\CleanYourTV.CherryBlossom` |
+| Fork / branch | `huzaifa-d/cleanyourtv` / `Cherry-BLossom` |
 
 It installs alongside Neons and CleanYourTV. It does not choose default Home,
 disable packages, run cleanup, intercept global remote keys or enable services.
@@ -27,7 +28,7 @@ Requires JDK 17+ (the local build uses Android Studio's JDK 21), Android SDK 34 
 build-tools 34.0.0. The independent wrapper uses Gradle 8.9 / AGP 8.5.2.
 
 ```powershell
-Set-Location 'A:\Repos\CleanYourTV'
+Set-Location 'A:\Repos\CleanYourTV.CherryBlossom'
 $env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
 $env:ANDROID_HOME='A:\Android'
 .\native-aurora\gradlew.bat -p .\native-aurora --console=plain `
@@ -40,17 +41,16 @@ Release builds use R8/resource shrinking and the local Android debug signing key
 for personal sideloading, **not a production distribution key**. Updates require
 the same signing key.
 
-Artwork/fonts are staged from this module's `assets` folder. The
-`native-aurora\assets\aurora\blue-bokeh.mp4` is included in source and the APK,
-so builds do not need an untracked private file. The user confirmed ownership
-or permission to redistribute both supplied backgrounds in this public fork
-and its APK. This does not grant an additional open artwork licence or rights
-to the brand marks; see `assets\aurora\CREDITS.txt`.
-The bundled default is a 1080p/30 H.264 copy of Blue Bokeh, transcoded offline
-from the 4K AV1 original for broader playback compatibility. The original PC
-file is unchanged. Nothing downloads or transcodes video at runtime.
-Builds without the MP4, or devices
-that cannot decode it, retain the still wallpaper.
+Artwork/fonts are staged from this module's `assets` folder. The default is the
+user-supplied 2000x1125 Cherry Blossom still with sixteen native drifting petal
+sprites. No video decoder runs for the default scene. The supplied blossom and
+six petal textures retain their original resolution; disconnected faint alpha
+debris was removed without inpainting, sharpening or upscaling. The source sheet
+and logo SVGs remain under `assets\aurora\cherry\source`, outside APK staging.
+Original PC files are unchanged. Archived Blue Bokeh/Aurora media remains in
+source but is not included in this branch's APK. Nothing downloads or transcodes
+at runtime. No additional open artwork licence or rights to brand marks are
+asserted; see `assets\aurora\CREDITS.txt`.
 
 ## Install and provide an MP4
 
@@ -62,7 +62,7 @@ discover/connect to network TVs or change device authorisation.
 $adb='A:\Android\platform-tools\adb.exe'
 $serial='SELECTED_TV_SERIAL'
 & $adb -s $serial install -r `
-  'A:\Repos\CleanYourTV\native-aurora\app\build\outputs\apk\release\app-release.apk'
+  'A:\Repos\CleanYourTV.CherryBlossom\native-aurora\app\build\outputs\apk\release\app-release.apk'
 & $adb -s $serial shell am start -n `
   'com.huzaifa.aurora.nativehome/com.gathin.tvhome.AuroraActivity'
 ```
@@ -99,7 +99,8 @@ The PC originals and Neons are unaffected.
 | Cold launch | No visible selection |
 | Right / Down from idle | Netflix |
 | Left from idle | All Apps |
-| Up | Profile |
+| Up from upper row | Profile |
+| Up / Down between rows | Nearest mapped blossom |
 | Left / Right in row | Adjacent shortcut; no wrapping |
 | Down from profile | Last row item, initially Netflix |
 | OK | Open shortcut, All Apps or profile hub |
@@ -107,15 +108,20 @@ The PC originals and Neons are unaffected.
 | Back in panel | Close that panel |
 | Back on Home | Clear selection |
 
-The row is Netflix, Prime, YouTube, Disney+, JioHotstar, Apple TV and All Apps.
-Branded shortcuts are white at rest at 1.5x the original artwork dimensions.
-Focus uses the brand artwork at 2x original size, with no selection box or fill.
+The staggered upper row is Netflix, Prime, YouTube and Disney+; the lower row is
+Apple TV, JioHotstar and All Apps. Down maps the four upper shortcuts to
+Apple TV, Apple TV, JioHotstar and All Apps; Up maps the lower shortcuts to
+Netflix, YouTube and Disney+. Down at the bottom and horizontal row edges stop.
+Seven differently angled blossoms carry upright white marks at rest.
+Focus grows the blossom to 1.14x, gently turns only its flower another 8 degrees
+and changes the logo to brand colours, with no selection box or fill.
+Disney+ uses the full pre-2024 dark-blue wordmark and blue/cyan gradient arc.
 Apple TV uses Apple's pearlescent mark on focus. All Apps is labelled
 and scrollable. Missing applications show a message, never a store redirect.
 Native home glyphs are rasterised at output resolution, including All Apps'
 maximum focus size. Brand images are decoded for that same focused output size,
 bounded by the original asset resolution. Library icons use their displayed
-pixel dimensions and a size-aware cache; icon artwork and layout are unchanged.
+pixel dimensions and a size-aware cache.
 The clock uses the device's timezone and 12/24-hour preference.
 Its small white status icon shows Ethernet or Wi-Fi when Android validates the
 default connection's internet access, or a crossed-out connection otherwise,
@@ -127,23 +133,28 @@ The greeting alternates fifteen seconds of English with ten seconds of Urdu,
 using a gentle 400 ms fade/slide. Urdu uses bundled OFL-licensed Noto Sans Arabic with native
 right-to-left shaping on one horizontal line, anchored beside the profile. Time-of-day updates preserve
 the current language. The cycle stops behind panels and when Home is inactive;
-returning starts a fresh English interval. Only the greeting animates.
+returning starts a fresh English interval.
+
+Sixteen falling petals share six native textures in one Canvas view, with
+independent 14-36-second cycles, varied opacity, phase, size, angle and drift.
+Each cycle fades out before wrapping. Frame callbacks stop behind panels,
+when Home is inactive and on detach; resuming does not advance hidden time.
+System-disabled animation stops the petal loop. The background itself is still.
 
 The hub contains Background, Show RAM counter, HDMI / Inputs, System settings,
 App management and About/credits. Inputs use Android TV channel intents and
 Sony fallbacks; they do not remap physical remote keys.
 
-All backgrounds play at **1x**, including custom MP4s. There is no speed selector;
-previously saved speed values are ignored. The 12-second Blue Bokeh source
-therefore repeats every 12 seconds. Selection and RAM visibility persist across
-restarts and in-place updates. **Default background** resets the source.
+Custom MP4s play at **1x**. There is no speed selector; previously saved speed
+values are ignored. Selection and RAM visibility persist across restarts and
+in-place updates. **Default background** returns to the Cherry Blossom still.
 
 Playback is silent, looping and centre-cropped through one Media3 ExoPlayer /
 SurfaceView, with audio/text tracks disabled. Two references to the same local
 clip form a repeating playlist, queuing the next loop without the native
 MediaPlayer's end-of-file seek/decoder flush. Only one video decoder is used;
 compressed buffering targets 4 MiB and five seconds, not decoded-frame
-or dual-player crossfading. The bundled video's frames/motion are unchanged;
+or dual-player crossfading. Custom video frames/motion are unchanged;
 a visible discontinuity already in any supplied clip is not edited away.
 Opening a panel, leaving Home, losing the surface or screen-off
 releases the player. Returning restarts from the beginning. Failed, missing,
@@ -167,12 +178,16 @@ labelled unavailable, not fabricated as zero.
 ## Verification boundaries
 
 JVM policy tests, Android lint, release APK audit and local emulator UI tests are
-separate from Sony hardware acceptance. Before relocation, the native app
-passed 28 JVM tests and 12 Android UI/playback tests on an isolated Android 14
-TV / 1080p emulator. The relocated module is rebuilt with its JVM tests and
-release lint (zero errors; advisory warnings remain). APK auditing checks for
+separate from Sony hardware acceptance. Initial Cherry Blossom validation passes 34 JVM tests and
+24 Android UI/playback tests on an isolated Android 14 TV / 960x540 emulator.
+The final Apple TV/JioHotstar position swap is additionally checked against all
+34 JVM tests and the four native navigation/lifecycle tests.
+Icon tests cover physical output sizes through 4K; the release scene is also
+inspected in the separate 1080p visible preview. Release lint has zero errors;
+advisory warnings remain, including the programmatic-only view constructors.
+APK auditing checks for
 permissions, Flutter runtime and test media, verifies the signature, and checks
-the bundled default video's format and hash.
+the staged Cherry Blossom assets and absence of bundled video.
 
 An emulator cannot establish Sony remote/input compatibility, 4K AV1 decoder
 behaviour, loop quality or real RAM savings.

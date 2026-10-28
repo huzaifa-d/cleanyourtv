@@ -2,9 +2,8 @@ package com.gathin.tvhome;
 
 import static org.junit.Assert.*;
 import android.view.KeyEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.os.SystemClock;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -47,57 +46,76 @@ public class AuroraNavigationTest {
         }
     }
 
-    @Test public void sevenBorderlessIconsGrowWithoutClippingOrOverlap() {
+    @Test public void sevenBlossomsFollowBothRowsGrowAndTurnWithUprightMarks() {
         int[] ids = {R.id.netflix, R.id.prime, R.id.youtube, R.id.disney,
                 R.id.hotstar, R.id.apple_tv, R.id.all_apps};
+        int[] angles = {-28, 46, -84, 118, -142, 76, 164};
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
             Drawable[] idleApple = new Drawable[1];
             scene.onActivity(activity -> {
+                Object sharedBlossom = null;
                 for (int id : ids) {
-                    ViewGroup tile = activity.findViewById(id);
+                    BlossomTile tile = activity.findViewById(id);
                     assertNull(tile.getBackground());
-                    ImageView mark = (ImageView) tile.getChildAt(0);
-                    assertNotNull(mark.getDrawable());
-                    assertEquals(1.5f, mark.getScaleX(), 0.001f);
-                    assertEquals(1.5f, mark.getScaleY(), 0.001f);
+                    assertNotNull(tile.mark.getDrawable());
+                    assertEquals(1f, tile.getScaleX(), .001f);
+                    assertEquals(1f, tile.getScaleY(), .001f);
+                    Object bitmap = ((BitmapDrawable) tile.flower.getDrawable()).getBitmap();
+                    if (sharedBlossom == null) sharedBlossom = bitmap;
+                    else assertSame("Seven buttons must share one native texture", sharedBlossom, bitmap);
                 }
-                ViewGroup apple = activity.findViewById(R.id.apple_tv);
+                BlossomTile apple = activity.findViewById(R.id.apple_tv);
+                BlossomTile hotstar = activity.findViewById(R.id.hotstar);
+                assertTrue("Apple TV must occupy the left blossom, with JioHotstar in the middle",
+                        apple.getLeft() < hotstar.getLeft());
                 assertEquals("Apple TV", apple.getContentDescription().toString());
-                idleApple[0] = ((ImageView) apple.getChildAt(0)).getDrawable();
+                idleApple[0] = apple.mark.getDrawable();
             });
-            for (int focused = 0; focused < ids.length; focused++) {
-                key(KeyEvent.KEYCODE_DPAD_RIGHT);
-                final int current = focused;
+            int[] order = {0, 1, 2, 3, 6, 4, 5};
+            int[] keys = {KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_RIGHT,
+                    KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_RIGHT,
+                    KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_LEFT};
+            for (int step = 0; step < order.length; step++) {
+                key(keys[step]);
+                SystemClock.sleep(300);
+                final int current = order[step];
                 scene.onActivity(activity -> {
-                    ViewGroup tile = activity.findViewById(ids[current]);
+                    BlossomTile tile = activity.findViewById(ids[current]);
                     assertTrue(tile.hasFocus());
                     assertNull(tile.getBackground());
-                    float previousRight = 0;
                     for (int index = 0; index < ids.length; index++) {
-                        ViewGroup item = activity.findViewById(ids[index]);
-                        ImageView mark = (ImageView) item.getChildAt(0);
-                        float scale = index == current ? 2f : 1.5f;
-                        assertEquals(scale, mark.getScaleX(), 0.001f);
-                        assertEquals(scale, mark.getScaleY(), 0.001f);
-                        float centre = item.getLeft() + mark.getLeft() + mark.getWidth() / 2f;
-                        float halfWidth = mark.getWidth() * scale / 2f;
-                        assertTrue(centre - halfWidth >= previousRight);
-                        assertTrue(centre + halfWidth <= 960);
-                        assertTrue(item.getTop() + mark.getTop()
-                                + mark.getHeight() / 2f - mark.getHeight() * scale / 2f >= 0);
-                        assertTrue(item.getTop() + mark.getTop()
-                                + mark.getHeight() / 2f + mark.getHeight() * scale / 2f <= 540);
-                        previousRight = centre + halfWidth;
+                        BlossomTile item = activity.findViewById(ids[index]);
+                        float scale = index == current ? 1.14f : 1f;
+                        assertEquals(scale, item.getScaleX(), .001f);
+                        assertEquals(scale, item.getScaleY(), .001f);
+                        assertEquals(angles[index] + (index == current ? 8 : 0),
+                                item.flower.getRotation(), .001f);
+                        assertEquals(0, item.mark.getRotation(), 0);
+                        assertEquals(1, item.mark.getScaleX(), 0);
+                        float x = item.getLeft() + item.getWidth() / 2f;
+                        float y = item.getTop() + item.getHeight() / 2f;
+                        float radius = item.getWidth() * scale / 2f;
+                        assertTrue(x - radius > 0 && x + radius < 960);
+                        assertTrue(y - radius > 0 && y + radius < 540);
+                        for (int other = index + 1; other < ids.length; other++) {
+                            BlossomTile neighbour = activity.findViewById(ids[other]);
+                            float dx = x - neighbour.getLeft() - neighbour.getWidth() / 2f;
+                            float dy = y - neighbour.getTop() - neighbour.getHeight() / 2f;
+                            assertTrue("Blossoms must leave room for focus growth",
+                                    Math.hypot(dx, dy) > radius + neighbour.getWidth()
+                                            * neighbour.getScaleX() / 2f);
+                        }
                     }
-                    if (current == 5) assertNotSame(idleApple[0],
-                            ((ImageView) tile.getChildAt(0)).getDrawable());
+                    if (current == 5) assertNotSame(idleApple[0], tile.mark.getDrawable());
                 });
             }
-            key(KeyEvent.KEYCODE_DPAD_LEFT);
-            scene.onActivity(activity -> assertTrue(activity.findViewById(R.id.apple_tv).hasFocus()));
+            key(KeyEvent.KEYCODE_DPAD_RIGHT);
+            scene.onActivity(activity -> assertTrue(activity.findViewById(R.id.hotstar).hasFocus()));
+            key(KeyEvent.KEYCODE_DPAD_UP);
+            scene.onActivity(activity -> assertTrue(activity.findViewById(R.id.youtube).hasFocus()));
             key(KeyEvent.KEYCODE_DPAD_UP);
             key(KeyEvent.KEYCODE_DPAD_DOWN);
-            scene.onActivity(activity -> assertTrue(activity.findViewById(R.id.apple_tv).hasFocus()));
+            scene.onActivity(activity -> assertTrue(activity.findViewById(R.id.youtube).hasFocus()));
             key(KeyEvent.KEYCODE_BACK);
             scene.onActivity(activity -> assertTrue(activity.findViewById(R.id.home_root).hasFocus()));
         }

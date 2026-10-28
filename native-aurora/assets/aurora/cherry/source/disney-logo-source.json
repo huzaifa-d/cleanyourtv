@@ -1,0 +1,13 @@
+{
+  "asset": "disney-pre2024.svg",
+  "description": "Full 2019-era Disney+ wordmark and gradient arc, from the 17 December 2022 revision.",
+  "source_page": "https://commons.wikimedia.org/wiki/File:Disney%2B_logo.svg",
+  "download": "https://upload.wikimedia.org/wikipedia/commons/archive/3/3e/20240602221423%21Disney%2B_logo.svg",
+  "author": "Disney Enterprises, Inc.",
+  "source_page_original_source": "https://disneyplus.com/",
+  "source_dimensions": [1041, 565],
+  "selected": "Unmodified source vector, dark blue wordmark and original blue/cyan gradient arc.",
+  "idle": "Matching vector paths painted white; invisible paths remain invisible.",
+  "trademark": "Disney+ remains a trademark of its owner; no endorsement or brand permission is asserted.",
+  "scope": "Cherry-BLossom native home. Transparent 1024px-wide PNGs rendered with resvg; the original radial gradient is preserved."
+}

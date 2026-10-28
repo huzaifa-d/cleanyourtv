@@ -1,4 +1,15 @@
-Wallpaper: Aurora I.jpg, supplied by the user.
+Cherry Blossom theme: Cherry Blossom Background.jpg and Petals.png,
+supplied by the user. No additional open artwork license is asserted.
+The default background is the original 2000 x 1125 JPEG, unchanged.
+Seven transparent components were extracted from the 1313 x 1198 RGBA sheet,
+removing disconnected faint alpha debris only. The blossom content is
+649 x 597; the six petal contents are 315-353 pixels wide. Exports retain
+native resolution with 12 pixels of transparent padding on each edge.
+No upscaling, sharpening, recoloring or inpainting was applied.
+The original sheet and source metadata are retained in cherry/source, which
+is not staged into the APK. Sixteen native sprites share six petal textures.
+
+Archived wallpaper (source only on this branch): Aurora I.jpg, supplied by the user.
 Resized from 4928 x 3248 to 3840 x 2160 (4K UHD), with a centered 16:9 crop
 and Lanczos resampling. No stretching or recoloring. The original is unchanged.
 The user confirmed ownership or permission to redistribute this wallpaper
@@ -10,16 +21,20 @@ https://github.com/google/fonts/tree/main/ofl/roboto
 SIL Open Font License 1.1; full license bundled in fonts/OFL.txt in the APK.
 
 Minimal home artwork: sourced brand marks rasterized to transparent PNGs,
-maximum dimension 512 pixels. Separate white silhouettes and colour artwork.
+maximum dimension 512 pixels except Disney+ (1024 pixels wide).
+Separate white silhouettes and colour artwork.
 Netflix N:
 https://upload.wikimedia.org/wikipedia/commons/1/18/Netflix_2016_N_logo.svg
 Prime Video smile, extracted from the original logo:
 https://upload.wikimedia.org/wikipedia/commons/9/90/Prime_Video_logo_%282024%29.svg
 YouTube, official icon package (white and red):
 https://www.gstatic.com/marketing-cms/78/29/3e68a1414bb28d0b7e47b44c3c91/youtube-icon.zip
-Disney+, white silhouette and colour mark:
-https://upload.wikimedia.org/wikipedia/commons/a/a4/Disney%2B_2024_%28Print%29.svg
-https://static.wikia.nocookie.net/logopedia/images/f/f8/Disney%2B_%282024%29.svg/revision/latest?cb=20240325192610
+Disney+, full pre-2024 logo: original dark-blue wordmark and blue/cyan arc.
+Archived 17 December 2022 revision of the 2019-era SVG:
+https://commons.wikimedia.org/wiki/File:Disney%2B_logo.svg
+https://upload.wikimedia.org/wikipedia/commons/archive/3/3e/20240602221423%21Disney%2B_logo.svg
+Original gradient/geometry preserved; the white silhouette replaces only painted
+fills, leaving fill="none" invisible. Both SVGs are retained in cherry/source.
 JioHotstar star, extracted from the official embedded artwork:
 https://img10.hotstar.com/image/upload/v1737554969/web-assets/prod/images/rebrand/logo.svg
 Apple TV, white silhouette and pearlescent mark from Apple's 3600px hero logo:
@@ -29,14 +44,16 @@ Apple's accompanying notice is retained in aurora/APPLE_TV_LEGAL_NOTICE.rtf.
 These marks belong to their respective owners. No brand permission or open
 licence is asserted. All Apps and profile use native vector glyphs.
 
-Default video: Blue Bokeh.mp4, supplied by the user.
-The bundled aurora/blue-bokeh.mp4 is a 1920x1080/30 H.264 (yuv420p) copy,
+Archived video (source only on this branch): Blue Bokeh.mp4, supplied by the user.
+aurora/blue-bokeh.mp4 is a 1920x1080/30 H.264 (yuv420p) copy,
 transcoded from the supplied 4K AV1 original for broader decoder compatibility.
-It has no audio and loops at a default 0.5x (24 seconds per 12-second source loop).
+It has no audio. Custom MP4 playback is always 1x.
 The source file on the user's PC is unchanged. No runtime transcoding occurs.
 The user confirmed ownership or permission to redistribute this video
 in this public fork and its APK. No additional open artwork license is asserted.
-Unsupported playback retains the still wallpaper. Custom MP4s stay local.
+The Cherry Blossom APK excludes this video and the archived Aurora wallpaper.
+Its default still uses no video decoder. Unsupported custom playback retains
+the Cherry Blossom still. Custom MP4s stay local.
 
 RAM display: Android own-process proportional set size (PSS), and device
 used RAM (totalMem - availMem), each against total device RAM. Readings are

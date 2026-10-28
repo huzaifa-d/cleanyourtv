@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 import java.io.File;
-import java.io.IOException;
-import android.content.res.AssetFileDescriptor;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +35,7 @@ public final class AuroraActivity extends Activity {
     private BackgroundSession background;
     private AuroraPreferences preferences;
     private BackgroundFiles files;
-    private boolean resumed, windowFocused, surfaceReady, destroyed, defaultVideo, started, screenOn;
+    private boolean resumed, windowFocused, surfaceReady, destroyed, started, screenOn;
     private MemoryCounter memory;
     private NetworkMonitor network;
     private AuroraSettingsDialog settings;
@@ -81,9 +79,6 @@ public final class AuroraActivity extends Activity {
             if (directory != null && !directory.isDirectory() && !directory.mkdirs()) directory = null;
         } catch (RuntimeException unavailable) { directory = null; }
         files = new BackgroundFiles(directory);
-        try (AssetFileDescriptor ignored = getAssets().openFd("aurora/blue-bokeh.mp4")) {
-            defaultVideo = true;
-        } catch (IOException absent) { defaultVideo = false; }
         FrameLayout root = new FrameLayout(this);
         surface = new BackgroundSurface(this, ready -> {
             surfaceReady = ready;
@@ -214,7 +209,7 @@ public final class AuroraActivity extends Activity {
     private void reconcile() {
         if (background == null || destroyed) return;
         main.removeCallbacks(clockTick);
-        home.setGreetingActive(homeActive());
+        home.setHomeActive(homeActive());
         home.setMemoryVisible(preferences.showRam());
         memory.setEnabled(preferences.showRam());
         memory.setActive(homeActive());
@@ -222,13 +217,13 @@ public final class AuroraActivity extends Activity {
         if (!homeActive() || !surfaceReady) { background.deactivate(); return; }
         String selection = preferences.video();
         File selected = selection.isEmpty() ? null : files.resolve(selection);
-        String source = selection.isEmpty() ? defaultVideo ? "asset:blue-bokeh.mp4" : ""
+        String source = selection.isEmpty() ? ""
                 : selected == null ? "missing:" + selection : selected.getAbsolutePath();
         background.activate(source);
     }
     @Override protected void onDestroy() {
         destroyed = true;
-        home.setGreetingActive(false);
+        home.setHomeActive(false);
         main.removeCallbacksAndMessages(null);
         background.close();
         memory.close();
