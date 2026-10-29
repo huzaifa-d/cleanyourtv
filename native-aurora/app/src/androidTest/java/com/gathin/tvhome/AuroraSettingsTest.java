@@ -30,26 +30,32 @@ public class AuroraSettingsTest {
     }
     @Test public void ramAndNestedBackPersistWithoutSpeedSelectorAndRestoreProfile() {
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
+            scene.onActivity(activity ->
+                    assertEquals(View.GONE, activity.findViewById(R.id.memory).getVisibility()));
             menu();
-            onView(withId(R.id.ram_switch)).check(matches(isChecked())).perform(click());
+            onView(withId(R.id.ram_switch)).check(matches(isNotChecked())).perform(click());
             onView(withText(R.string.background)).perform(click());
             onView(withText(org.hamcrest.Matchers.startsWith("Playback speed"))).check(doesNotExist());
             onView(withText(R.string.default_background)).check(matches(isDisplayed()));
             pressBack();
-            onView(withId(R.id.ram_switch)).check(matches(isNotChecked()));
+            onView(withId(R.id.ram_switch)).check(matches(isChecked()));
             pressBack();
             scene.onActivity(activity -> {
                 assertTrue(activity.findViewById(R.id.profile).hasFocus());
-                assertEquals(View.GONE, activity.findViewById(R.id.memory).getVisibility());
+                assertEquals(View.VISIBLE, activity.findViewById(R.id.memory).getVisibility());
             });
             scene.recreate();
             menu();
-            onView(withId(R.id.ram_switch)).check(matches(isNotChecked()));
+            onView(withId(R.id.ram_switch)).check(matches(isChecked()));
             onView(withText(R.string.background)).perform(click());
             onView(withText(org.hamcrest.Matchers.startsWith("Playback speed"))).check(doesNotExist());
             onView(withText(R.string.default_background)).check(matches(isDisplayed()));
             pressBack();
+            onView(withId(R.id.ram_switch)).perform(click()).check(matches(isNotChecked()));
             pressBack();
+            scene.recreate();
+            scene.onActivity(activity ->
+                    assertEquals(View.GONE, activity.findViewById(R.id.memory).getVisibility()));
         }
     }
     @Test public void refreshFindsCompleteMp4AndSelectionSurvivesRecreation() throws Exception {

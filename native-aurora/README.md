@@ -13,14 +13,15 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 | Application ID | `com.huzaifa.aurora.nativehome` |
 | Activity | `com.gathin.tvhome.AuroraActivity` |
 | Minimum Android | 8.0 / API 26 |
-| Version | 1.7 / code 8 |
+| Version | 1.9 / code 10 |
 | Local checkout | `A:\Repos\CleanYourTV.CherryBlossom` |
 | Fork / branch | `huzaifa-d/cleanyourtv` / `Cherry-Blossom` |
 
 It installs alongside Neons and CleanYourTV. It does not choose default Home,
 disable packages, run cleanup or enable services automatically.
-The only permission is `ACCESS_NETWORK_STATE`, for the clock's connection icon.
-There are no internet, storage or privileged-settings permissions. The optional
+Permissions are `ACCESS_NETWORK_STATE` for the connection icon and `INTERNET`
+for the explicitly approved Redmond weather feature in this standalone fork.
+There are no location, storage or privileged-settings permissions. The optional
 Home-button service is protected by `BIND_ACCESSIBILITY_SERVICE` and runs only
 after you enable it in the TV's Accessibility settings.
 
@@ -43,16 +44,102 @@ Release builds use R8/resource shrinking and the local Android debug signing key
 for personal sideloading, **not a production distribution key**. Updates require
 the same signing key.
 
-Artwork/fonts are staged from this module's `assets` folder. The default is the
-user-supplied 2000x1125 Cherry Blossom still with sixteen native drifting petal
-sprites. No video decoder runs for the default scene. The supplied blossom and
+Artwork/fonts are staged from this module's `assets` folder. The default switches
+between the supplied 4K morning scene from 06:00 to 18:00 (TV-local time) and the
+moon-free night scene otherwise, with a two-second crossfade. At night, a separate
+Moon at 65% across / 15% down holds full for three visible seconds, then its curved
+shadow transitions over two seconds to the current offline-calculated phase.
+At dusk the hold starts after the background crossfade. Its texture is rotated,
+not mirrored, for Southern orientation: waxing lights the left, waning the right.
+The dark side retains faint earthshine, including at new Moon.
+
+The intro runs once per launcher start at night and on entering each night, not
+on midnight or every return from an app/panel. Hidden Home, screen-off and custom
+MP4 selection pause it; Activity recreation preserves progress. Time/timezone
+changes and the existing foreground minute tick refresh the schedule and phase.
+System-disabled animation skips transitions but keeps the three-second hold.
+The Moon is decorative all night, not a location-dependent rise/set simulation.
+Illumination uses the SunCalc 1.9.0 astronomical approximation, checked against
+USNO phase fixtures; it requires no network/location permission or new dependency.
+
+Background plates are lossless 3840x2160 WebP copies of the supplied PNGs.
+Foreground masks also cover near-camera flowers omitted from the original
+cutouts, while preserving both dry composited scenes pixel-for-pixel.
+Layers are decoded to the output resolution; only the current scene stays
+decoded outside crossfades. The transparent Moon
+master is cropped/masked to a clean disc and downsampled to 512px. No video decoder
+runs for the default scene. Custom MP4s retain their existing playback/fallback
+behaviour without the lunar overlay or intro. The supplied blossom and
 six petal textures retain their original resolution; disconnected faint alpha
 debris was removed without inpainting, sharpening or upscaling. The source sheet
 and logo SVGs remain under `assets\aurora\cherry\source`, outside APK staging.
 Original PC files are unchanged. Archived Blue Bokeh/Aurora media remains in
-source but is not included in this branch's APK. Nothing downloads or transcodes
-at runtime. No additional open artwork licence or rights to brand marks are
+source but is not included in this branch's APK. Artwork never downloads or
+transcodes at runtime. No additional open artwork licence or rights to brand marks are
 asserted; see `assets\aurora\CREDITS.txt`.
+
+### Weather-driven layered rain
+
+Rain, subtle lake ripples and falling petals draw between the distant scene/Moon
+and the stationary near-camera foliage; apps and header stay above them. Entire layered scenes
+crossfade together at 06:00/18:00. Rain uses cached output-resolution antialiased
+sprites and a deterministic twelve-second field, with no full-screen software
+buffer or per-frame bitmap allocation. Visible-time progress pauses behind
+panels, other apps, screen-off and custom video, and survives recreation.
+System-disabled animations hide the effect and stop its frame callbacks.
+
+Open-Meteo's current weather model for fixed Redmond, WA coordinates controls
+rain in both day and night scenes. The app makes HTTPS requests on one worker,
+at most every fifteen minutes while default Home is visible. It does not use
+device location, accounts, identifiers, telemetry or a background service.
+Cached data expires after thirty minutes; unavailable, malformed or stale
+weather falls back without rain. The model is not a local rain sensor.
+Source: [Open-Meteo](https://open-meteo.com/), weather data under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+Debug builds alone accept the `preview_rain` launch extra, with an explanatory
+toast, for dry-weather emulator inspection. Release builds ignore it; ordinary
+launches always follow automatic weather.
+
+### Cherry drawer
+
+Profile / Menu opens a rounded, Cherry-plum drawer on the right, with a dimmed
+Home behind it. Background, Inputs and Home button setup stay inside the drawer;
+Back returns to the originating tile, then closes the
+main drawer. Show RAM defaults off and remains a persisted toggle. The date/clock header has
+icon-only System settings and Google TV profile buttons, without a footer.
+The Show RAM pill is 20x14 logical pixels, with its original height retained.
+
+"Created with ❤️ for Maahi" appears faintly at the bottom-left of Home after ten
+cumulative visible seconds per launcher start. Panels, other apps and screen-off
+pause the delay; Activity recreation preserves progress. Once shown it remains,
+without taking D-pad focus or announcing itself through accessibility.
+
+Drawer icons use official Google Material Symbols Rounded vectors, not custom
+path approximations. Each glyph caches antialiased coverage at its actual pixel
+size before hardware compositing, preserving smooth small edges without
+upscaling a low-resolution icon. Focus colours and transparency are applied to
+that reusable coverage; no full-panel software layer is needed.
+
+Bluetooth, Screensaver and Accessibility open the TV's own settings pages.
+Unavailable pages explain the limitation and offer System settings. The profile
+button attempts the exported Google TV `ProfileChooserActivity` only when
+installed and accessible; otherwise it reports unavailable. This is
+firmware-dependent, not a universal profile-switching API. Cherry never enables
+the stock launcher, changes Google accounts itself or requests extra permissions.
+The separate Home-screen cog keeps opening the native TV quick-settings panel.
+
+Google Home replaces the About/credits tile and attempts the native smart-home
+panel, not the stock Home screen. It requires enabled Google TV and Ambient Mode
+packages and an accessible native panel; Google Home setup and account eligibility
+remain Google's responsibility. Missing or blocked panels explain the limitation
+without closing Cherry's drawer. No permission grants or package changes are
+performed. Full third-party notices remain bundled in the APK.
+
+Lunar edges use antialiased circle/ellipse geometry in a tiny cached bitmap at
+output resolution, avoiding hard GPU clipping without blurring the crater
+texture. The existing position, Southern orientation and phase timeline are
+unchanged.
 
 ## Install and provide an MP4
 
@@ -215,7 +302,7 @@ releases the player. Returning restarts from the beginning. Failed, missing,
 unsupported or timed-out media falls back to the still wallpaper without a retry
 loop. Settings remain available to reset the source.
 
-The RAM counter defaults on. Turning it off hides both lines and cancels polling;
+The RAM counter defaults off. Turning it off hides both lines and cancels polling;
 there is no background polling service. Enabled readings run off the UI thread
 at five-second intervals after the previous sample completes, only on active
 Home:

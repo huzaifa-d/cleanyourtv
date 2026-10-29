@@ -10,6 +10,10 @@ import java.nio.charset.StandardCharsets;
 final class CreditsDialog {
     private CreditsDialog() { }
     static AlertDialog create(Activity activity) {
+        return new AlertDialog.Builder(activity).setTitle(R.string.about).setMessage(text(activity))
+                .setPositiveButton(android.R.string.ok, null).create();
+    }
+    static String text(Activity activity) {
         StringBuilder text = new StringBuilder(activity.getString(R.string.app_name)).append(' ');
         try {
             text.append(activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0).versionName);
@@ -18,7 +22,7 @@ final class CreditsDialog {
                 .append("\n\nBrand marks belong to their owners. The default background is bundled with permission; custom MP4s remain local.");
         for (String path : new String[] {"notices/UPSTREAM.txt", "notices/THIRD_PARTY_NOTICES.txt", "notices/LICENSE",
                 "aurora/CREDITS.txt", "fonts/OFL.txt", "fonts/NotoSansArabic-OFL.txt",
-                "notices/MEDIA3-LICENSE.txt"}) {
+                "notices/MEDIA3-LICENSE.txt", "notices/SUNCALC-LICENSE.txt"}) {
             try (InputStream input = activity.getAssets().open(path);
                     ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[4096];
@@ -33,7 +37,6 @@ final class CreditsDialog {
                 text.append("\n\n").append(notice);
             } catch (IOException unavailable) { text.append("\n\nNotice unavailable: ").append(path); }
         }
-        return new AlertDialog.Builder(activity).setTitle(R.string.about).setMessage(text)
-                .setPositiveButton(android.R.string.ok, null).create();
+        return text.toString();
     }
 }

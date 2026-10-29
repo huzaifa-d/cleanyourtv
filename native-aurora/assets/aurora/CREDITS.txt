@@ -1,6 +1,18 @@
 Cherry Blossom theme: Cherry Blossom Background.jpg and Petals.png,
 supplied by the user. No additional open artwork license is asserted.
-The default background is the original 2000 x 1125 JPEG, unchanged.
+The scheduled defaults derive from background_morning.png, background_night.png,
+foreground_morning.png and foreground_night.png in the user-supplied
+cherry_blossom_layered_assets.zip. Backgrounds are lossless 3840 x 2160 copies.
+The foreground alpha masks are completed around nearby flowers omitted from
+the supplied cutouts. Foreground RGB is reconstructed against the background
+so both dry scenes remain pixel-identical to the original composites.
+The exports are lossless, with no artwork resampling or recolouring.
+The original 2000 x 1125 JPEG remains a decode
+failure fallback. Detailed Full Moon on Transparent Background.png is also
+user-supplied; an inscribed circular crop removes exterior fringe, with a
+2-pixel alpha feather before downsampling to a 512 x 512 transparent master.
+The runtime rotates the Moon texture 180 degrees without mirroring it.
+Original PC files are unchanged. No additional open artwork licence is asserted.
 Seven transparent components were extracted from the 1313 x 1198 RGBA sheet,
 removing disconnected faint alpha debris only. The blossom content is
 649 x 597; the six petal contents are 315-353 pixels wide. Exports retain
@@ -60,3 +72,10 @@ used RAM (totalMem - availMem), each against total device RAM. Readings are
 sampled at approximately five-second intervals and may be cached by Android.
 PSS is not Dart heap usage and may exclude decoder/GPU allocations in other
 processes. Device usage includes all apps and the OS, not just this launcher.
+
+Redmond rain conditions: Open-Meteo weather model data.
+https://open-meteo.com/
+Weather data licensed under Creative Commons Attribution 4.0:
+https://creativecommons.org/licenses/by/4.0/
+Current rain/showers and WMO condition codes control the decorative rain effect.
+No device location is collected. Model estimates are not a local rain sensor.

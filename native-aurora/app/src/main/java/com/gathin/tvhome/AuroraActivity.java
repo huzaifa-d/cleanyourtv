@@ -41,6 +41,7 @@ public final class AuroraActivity extends Activity {
     private boolean resumed, windowFocused, surfaceReady, destroyed, started, screenOn;
     private MemoryCounter memory;
     private NetworkMonitor network;
+    private RainWeather weather;
     private AuroraSettingsDialog settings;
     private LauncherSounds sounds;
     private final ExecutorService memoryWorker = Executors.newSingleThreadExecutor();
@@ -73,7 +74,11 @@ public final class AuroraActivity extends Activity {
         if (state != null) navigation.restore(state.getInt("target", HomeNavigation.IDLE),
                 state.getInt("last_row", 0));
         home = new AuroraHomeView(this, navigation, this::selected);
+        home.restoreState(state);
         network = new NetworkMonitor(this, main, home::setNetworkStatus);
+        weather = new RainWeather(this, main, () -> {
+            if (!destroyed) home.setRain(weather.raining() || rainPreview());
+        });
         preferences = new AuroraPreferences(getSharedPreferences("aurora", MODE_PRIVATE));
         File directory, external = null;
         try {
@@ -123,6 +128,11 @@ public final class AuroraActivity extends Activity {
         sounds.attach(getWindow().getDecorView());
         home.applyFocus(navigation.target());
         catalog.load(result -> apps = result);
+        if (rainPreview()) Toast.makeText(this, R.string.rain_preview, Toast.LENGTH_LONG).show();
+    }
+    private boolean rainPreview() {
+        return (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                && getIntent().getBooleanExtra("preview_rain", false);
     }
     private void selected(int target) {
         if (target == HomeNavigation.NETWORK) return;
@@ -202,6 +212,8 @@ public final class AuroraActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         resumed = true;
+        // A preserved window can retain focus without a new focus callback.
+        windowFocused = hasWindowFocus();
         screenOn = interactive();
         launching = false;
         if (library.isShowing()) library.refresh();
@@ -233,7 +245,10 @@ public final class AuroraActivity extends Activity {
     private void reconcile() {
         if (background == null || destroyed) return;
         main.removeCallbacks(clockTick);
+        home.setDefaultBackground(preferences.video().isEmpty());
         home.setHomeActive(homeActive());
+        weather.setActive(homeActive() && preferences.video().isEmpty());
+        home.setRain(weather.raining() || rainPreview());
         home.setMemoryVisible(preferences.showRam());
         memory.setEnabled(preferences.showRam());
         memory.setActive(homeActive());
@@ -248,6 +263,7 @@ public final class AuroraActivity extends Activity {
     }
     @Override protected void onDestroy() {
         destroyed = true;
+        weather.close();
         home.setHomeActive(false);
         sounds.close();
         main.removeCallbacksAndMessages(null);
@@ -263,6 +279,7 @@ public final class AuroraActivity extends Activity {
         state.putInt("target", navigation.target());
         state.putInt("last_row", navigation.lastRow());
         state.putBoolean("login_played", sounds.loginPlayed());
+        home.saveState(state);
         super.onSaveInstanceState(state);
     }
     @Override protected void onNewIntent(Intent intent) {

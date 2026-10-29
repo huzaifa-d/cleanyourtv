@@ -2,6 +2,7 @@ package com.gathin.tvhome;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.provider.Settings;
@@ -37,7 +38,38 @@ final class SystemSettings {
     static boolean openAccessibility(Activity activity) {
         return openAction(activity, Settings.ACTION_ACCESSIBILITY_SETTINGS);
     }
-    private static boolean openAction(Activity activity, String action) {
+    static boolean openProfiles(Activity activity) {
+        return openComponent(activity, new ComponentName(
+                "com.google.android.apps.tv.launcherx",
+                "com.google.android.apps.tv.launcherx.profile.chooser.ProfileChooserActivity"));
+    }
+    static boolean openGoogleHome(Activity activity) {
+        try {
+            if (!activity.getPackageManager().getApplicationInfo(
+                    "com.google.android.apps.tv.launcherx", 0).enabled) return false;
+        } catch (PackageManager.NameNotFoundException | SecurityException unavailable) {
+            return false;
+        }
+        return openComponent(activity, new ComponentName("com.google.android.apps.tv.dreamx",
+                "com.google.android.libraries.tv.smarthome.core.SmartHomeMainActivity"));
+    }
+    private static boolean openComponent(Activity activity, ComponentName component) {
+        Intent target = new Intent().setComponent(component);
+        try {
+            android.content.pm.ActivityInfo info = activity.getPackageManager()
+                    .getActivityInfo(component, 0);
+            if (!info.exported || !info.enabled || !info.applicationInfo.enabled) return false;
+            if (info.permission != null && activity.checkSelfPermission(info.permission)
+                    != PackageManager.PERMISSION_GRANTED) return false;
+            activity.startActivity(target);
+            return true;
+        } catch (PackageManager.NameNotFoundException | android.content.ActivityNotFoundException
+                | SecurityException unavailable) {
+            Log.w("CherrySettings", "Native Google TV page unavailable: " + component, unavailable);
+            return false;
+        }
+    }
+    static boolean openAction(Activity activity, String action) {
         Intent target = intent(activity, action);
         if (target == null) {
             Log.w("CherrySettings", "No exported activity handles " + action);

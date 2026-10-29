@@ -18,6 +18,7 @@ final class PetalView extends View {
     private final PetalMotion[] petals = new PetalMotion[16];
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final RectF destination = new RectF();
+    private final Runnable redrawScene;
     private boolean active, running;
     private long elapsedMillis, lastFrame;
     private final Runnable frame = new Runnable() {
@@ -31,12 +32,18 @@ final class PetalView extends View {
             elapsedMillis += now - lastFrame;
             lastFrame = now;
             invalidate();
+            if (redrawScene != null && getVisibility() == INVISIBLE) redrawScene.run();
             postOnAnimation(this);
         }
     };
 
     PetalView(Context context) {
+        this(context, null);
+    }
+
+    PetalView(Context context, Runnable redrawScene) {
         super(context);
+        this.redrawScene = redrawScene;
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         for (int i = 0; i < textures.length; i++) {
             try (InputStream input = context.getAssets().open("aurora/cherry/petal-" + (i + 1) + ".png")) {

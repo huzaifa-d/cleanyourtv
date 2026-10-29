@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -27,14 +29,24 @@ final class AuroraHomeView extends FrameLayout {
     private final BlossomTile[] tiles = new BlossomTile[BrandShortcut.values().length];
     private final PetalView petals;
     private final OutputResolutionIconView profile, settings;
-    private final TextView greeting, clock, memory;
+    private final TextView greeting, clock, memory, dedication;
     private final Typeface typeface, urduTypeface;
     private final HomeNavigation navigation;
-    private final ImageView still;
+    private final ThemeBackgroundView still;
     private final OutputResolutionIconView network;
     private float iconScale;
     private boolean greetingActive, greetingUrdu;
     private int greetingGeneration;
+    private long dedicationRemaining = 10000, dedicationVisibleSince;
+    private boolean dedicationActive;
+    private final Runnable dedicationReveal = new Runnable() {
+        @Override public void run() {
+            if (!dedicationActive) return;
+            updateDedicationTime();
+            if (dedicationRemaining == 0) dedication.setVisibility(VISIBLE);
+            else postDelayed(this, dedicationRemaining);
+        }
+    };
     private final Runnable greetingTick = new Runnable() {
         @Override public void run() {
             if (!greetingActive) return;
@@ -65,18 +77,19 @@ final class AuroraHomeView extends FrameLayout {
         composition.setFocusableInTouchMode(true);
         addView(composition);
 
-        still = new ImageView(context);
+        still = new ThemeBackgroundView(context);
         still.setId(R.id.background_still);
-        still.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        still.setImageBitmap(decode("aurora/cherry-blossom.jpg", 2000));
         composition.addView(still, position(960, 540, 0, 0));
         View shade = new View(context);
         shade.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                 new int[] {0x33000000, Color.TRANSPARENT, Color.TRANSPARENT,
                     Color.TRANSPARENT, 0x11000000}));
         composition.addView(shade, position(960, 540, 0, 0));
-        petals = new PetalView(context);
+        petals = new PetalView(context, still::invalidate);
         petals.setId(R.id.petals);
+        // The still scene draws petals below foliage; custom video uses this sibling.
+        petals.setVisibility(INVISIBLE);
+        still.setPetals(petals);
         composition.addView(petals, position(960, 540, 0, 0));
 
         profile = new OutputResolutionIconView(context);
@@ -97,6 +110,7 @@ final class AuroraHomeView extends FrameLayout {
         greeting.setId(R.id.greeting);
         greeting.setSingleLine(true);
         greeting.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        greeting.setShadowLayer(3f, 0f, 1f, 0xCC000000);
         composition.addView(greeting, position(450, 64, 110, 18));
         clock = text(17.3f);
         clock.setId(R.id.clock);
@@ -152,6 +166,15 @@ final class AuroraHomeView extends FrameLayout {
         memory.setGravity(Gravity.END | Gravity.BOTTOM);
         memory.setFontFeatureSettings("tnum");
         composition.addView(memory, position(300, 36, 636, 492));
+        dedication = text(11f);
+        dedication.setId(R.id.dedication);
+        dedication.setText(R.string.created_with_love);
+        dedication.setGravity(Gravity.LEFT | Gravity.BOTTOM);
+        dedication.setShadowLayer(3f, 0f, 1f, 0xCC000000);
+        dedication.setAlpha(.3f);
+        dedication.setVisibility(INVISIBLE);
+        dedication.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        composition.addView(dedication, position(280, 20, 33, 508));
         updateClock();
         composition.requestFocus();
     }
@@ -234,9 +257,26 @@ final class AuroraHomeView extends FrameLayout {
     void setProfilePhoto(Bitmap photo) { profile.setBitmapContent(photo); }
     void setMemoryText(String reading) { memory.setText(reading); }
     void setHomeActive(boolean active) {
+        setDedicationActive(active);
+        still.setActive(active);
         setGreetingActive(active);
         petals.setActive(active);
         for (BlossomTile tile : tiles) tile.setActive(active);
+    }
+    private void updateDedicationTime() {
+        if (!dedicationActive || dedicationRemaining == 0) return;
+        long now = SystemClock.uptimeMillis();
+        dedicationRemaining = Math.max(0, dedicationRemaining - (now - dedicationVisibleSince));
+        dedicationVisibleSince = now;
+    }
+    private void setDedicationActive(boolean active) {
+        if (dedicationActive == active) return;
+        updateDedicationTime();
+        dedicationActive = active;
+        dedicationVisibleSince = SystemClock.uptimeMillis();
+        removeCallbacks(dedicationReveal);
+        dedication.setVisibility(dedicationRemaining == 0 ? VISIBLE : INVISIBLE);
+        if (active && dedicationRemaining > 0) postDelayed(dedicationReveal, dedicationRemaining);
     }
     void setGreetingActive(boolean active) {
         if (greetingActive == active) return;
@@ -255,11 +295,26 @@ final class AuroraHomeView extends FrameLayout {
         network.setContentDescription(getContext().getString(status.description));
     }
     void setMemoryVisible(boolean visible) { memory.setVisibility(visible ? VISIBLE : GONE); }
+    void setDefaultBackground(boolean selected) { still.setDefaultSelected(selected); }
+    void setRain(boolean raining) { still.setRain(raining); }
+    void saveState(Bundle state) {
+        still.save(state);
+        updateDedicationTime();
+        state.putLong("dedication_remaining", dedicationRemaining);
+    }
+    void restoreState(Bundle state) {
+        still.restore(state);
+        if (state != null)
+            dedicationRemaining = Math.max(0, Math.min(10000, state.getLong("dedication_remaining", 10000)));
+        dedication.setVisibility(dedicationRemaining == 0 ? VISIBLE : INVISIBLE);
+    }
     void setVideoVisible(boolean visible) {
-        still.setVisibility(visible ? INVISIBLE : VISIBLE);
+        still.setVideoVisible(visible);
+        petals.setVisibility(visible ? VISIBLE : INVISIBLE);
         setBackgroundColor(visible ? Color.TRANSPARENT : 0xFF171B35);
     }
     void updateClock() {
+        still.updateTime();
         Calendar now = Calendar.getInstance();
         updateGreeting();
         clock.setText(DateFormat.format(DateFormat.is24HourFormat(getContext()) ? "HH:mm" : "h:mm a", now));
@@ -288,10 +343,15 @@ final class AuroraHomeView extends FrameLayout {
         int x = Math.round((getWidth() - 960 * scale) / 2);
         int y = Math.round((getHeight() - 540 * scale) / 2);
         updateIconResolution(scale);
+        still.setOutputWidth(Math.round(960 * scale));
         composition.layout(x, y, x + 960, y + 540);
         composition.setPivotX(0);
         composition.setPivotY(0);
         composition.setScaleX(scale);
         composition.setScaleY(scale);
+    }
+    @Override protected void onDetachedFromWindow() {
+        setDedicationActive(false);
+        super.onDetachedFromWindow();
     }
 }

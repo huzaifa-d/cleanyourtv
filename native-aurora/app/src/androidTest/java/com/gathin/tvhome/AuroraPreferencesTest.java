@@ -19,12 +19,12 @@ public class AuroraPreferencesTest {
     @Test public void choicesSurviveRecreation() {
         store.edit().clear().commit();
         AuroraPreferences first = new AuroraPreferences(store);
-        assertTrue(first.showRam());
+        assertFalse(first.showRam());
         first.setVideo("my background.mp4");
-        first.setShowRam(false);
+        first.setShowRam(true);
         AuroraPreferences second = new AuroraPreferences(store);
         assertEquals("my background.mp4", second.video());
-        assertFalse(second.showRam());
+        assertTrue(second.showRam());
     }
 
     @Test public void rejectsUnsafeNames() {

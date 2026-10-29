@@ -1,4 +1,15 @@
 <resources>
+    <string name="drawer_ram">Show RAM</string>
+    <string name="google_home">Google Home</string>
+    <string name="google_home_unavailable">Google Home controls are unavailable or blocked on this TV. On supported Google TVs, keep Google TV and Ambient Mode enabled and set up the Home panel with your Google account.</string>
+    <string name="screensaver">Screensaver</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="accessibility">Accessibility</string>
+    <string name="switch_profile">Switch Google TV profile</string>
+    <string name="back_to_menu">Back to Cherry menu</string>
+    <string name="created_with_love">Created with ❤️ for Maahi</string>
+    <string name="profile_unavailable">Google TV profile switching is unavailable or blocked on this TV.</string>
+    <string name="shortcut_unavailable">%1$s settings are unavailable or blocked on this TV. You can try System settings instead.</string>
     <string name="no_apps">No launchable apps were found or access is unavailable.</string>
     <string name="background">Background</string>
     <string name="show_ram">Show RAM counter</string>
@@ -45,4 +56,5 @@
     <string name="network_wifi">Wi-Fi connected</string>
     <string name="network_offline">No validated internet connection</string>
     <string name="network_online">Internet connected</string>
+    <string name="rain_preview">Rain preview (debug build). Normal launches use Redmond weather.</string>
 </resources>

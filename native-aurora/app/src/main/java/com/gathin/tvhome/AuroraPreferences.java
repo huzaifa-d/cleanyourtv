@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 final class AuroraPreferences {
     private final SharedPreferences store;
     AuroraPreferences(SharedPreferences store) { this.store = store; }
-    boolean showRam() { return store.getBoolean("show_ram", true); }
+    boolean showRam() { return store.getBoolean("show_ram", false); }
     void setShowRam(boolean enabled) { store.edit().putBoolean("show_ram", enabled).apply(); }
     String video() {
         String name = store.getString("video", "");

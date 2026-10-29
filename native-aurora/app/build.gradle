@@ -10,8 +10,8 @@ android {
         applicationId 'com.huzaifa.aurora.nativehome'
         minSdk 26
         targetSdk 34
-        versionCode 8
-        versionName '1.7'
+        versionCode 10
+        versionName '1.9'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     compileOptions {
@@ -39,7 +39,7 @@ def generatedAssets = layout.buildDirectory.dir('generated/auroraAssets')
 def referenceAssets = rootProject.file('assets')
 def prepareAuroraAssets = tasks.register('prepareAuroraAssets', Sync) {
     from(new File(referenceAssets, 'aurora')) {
-        include 'icons/*.png', 'cherry/*.png', 'cherry-blossom.jpg', 'CREDITS.txt', 'APPLE_TV_LEGAL_NOTICE.rtf'
+        include 'icons/*.png', 'cherry/*.png', 'cherry/*.webp', 'cherry-blossom.jpg', 'CREDITS.txt', 'APPLE_TV_LEGAL_NOTICE.rtf'
         into 'aurora'
     }
     from(new File(referenceAssets, 'fonts')) {
@@ -47,7 +47,7 @@ def prepareAuroraAssets = tasks.register('prepareAuroraAssets', Sync) {
         into 'fonts'
     }
     from(rootProject.projectDir) {
-        include 'THIRD_PARTY_NOTICES.txt', 'UPSTREAM.txt', 'LICENSE', 'MEDIA3-LICENSE.txt'
+        include 'THIRD_PARTY_NOTICES.txt', 'UPSTREAM.txt', 'LICENSE', 'MEDIA3-LICENSE.txt', 'SUNCALC-LICENSE.txt'
         into 'notices'
     }
     into generatedAssets

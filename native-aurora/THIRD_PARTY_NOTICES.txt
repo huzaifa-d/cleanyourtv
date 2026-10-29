@@ -38,3 +38,21 @@ Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic).
 Licensed under SIL Open Font License 1.1.
 See assets/fonts/NotoSansArabic-OFL.txt.
 Source: https://github.com/google/fonts/tree/main/ofl/notosansarabic
+
+SunCalc 1.9.0 illumination and solar/lunar coordinate formulas, adapted to Java.
+Copyright (c) 2014, Vladimir Agafonkin.
+BSD-2-Clause; see SUNCALC-LICENSE.txt, also bundled under assets/notices.
+Source: https://github.com/mourner/suncalc/tree/v1.9.0
+
+Google Material Symbols Rounded (filled, weight 400, optical size 24)
+Copyright Google LLC.
+Licensed under Apache License 2.0; the full licence text is in MEDIA3-LICENSE.txt.
+The drawer's vector resources retain Google's path geometry and normalise the
+SVG viewBox to Android coordinates, with state-dependent foreground colours.
+Source: https://github.com/google/material-design-icons/tree/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/web
+
+Open-Meteo weather model data for fixed Redmond, WA coordinates.
+Source: https://open-meteo.com/
+Weather data: Creative Commons Attribution 4.0.
+https://creativecommons.org/licenses/by/4.0/
+Rain/showers and WMO condition codes drive the decorative rain overlay.
