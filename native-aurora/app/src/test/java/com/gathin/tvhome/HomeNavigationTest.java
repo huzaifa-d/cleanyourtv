@@ -4,6 +4,45 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class HomeNavigationTest {
+    @Test public void headerControlsAreReachableInVisibleOrderWithoutChangingAppRowEdges() {
+        HomeNavigation navigation = new HomeNavigation();
+        assertEquals(HomeNavigation.PROFILE, navigation.move(HomeNavigation.Direction.UP));
+        assertEquals(HomeNavigation.NETWORK, navigation.move(HomeNavigation.Direction.RIGHT));
+        assertEquals(HomeNavigation.QUICK_SETTINGS, navigation.move(HomeNavigation.Direction.RIGHT));
+        assertEquals(HomeNavigation.QUICK_SETTINGS, navigation.move(HomeNavigation.Direction.RIGHT));
+        assertEquals(HomeNavigation.NETWORK, navigation.move(HomeNavigation.Direction.LEFT));
+        assertEquals(HomeNavigation.PROFILE, navigation.move(HomeNavigation.Direction.LEFT));
+        assertEquals(HomeNavigation.PROFILE, navigation.move(HomeNavigation.Direction.LEFT));
+    }
+
+    @Test public void gearReturnsToLastAppAndSurvivesRecreation() {
+        HomeNavigation navigation = new HomeNavigation();
+        navigation.select(3);
+        navigation.move(HomeNavigation.Direction.UP);
+        navigation.move(HomeNavigation.Direction.RIGHT);
+        navigation.move(HomeNavigation.Direction.RIGHT);
+        HomeNavigation restored = new HomeNavigation();
+        restored.restore(navigation.target(), navigation.lastRow());
+        assertEquals(HomeNavigation.QUICK_SETTINGS, restored.target());
+        assertEquals(3, restored.move(HomeNavigation.Direction.DOWN));
+        restored.select(HomeNavigation.QUICK_SETTINGS);
+        restored.clear();
+        assertEquals(HomeNavigation.IDLE, restored.target());
+        assertThrows(IllegalArgumentException.class, () -> restored.select(-5));
+    }
+
+    @Test public void networkFocusRemembersAppWithoutChangingRowAndSurvivesRecreation() {
+        HomeNavigation navigation = new HomeNavigation();
+        navigation.select(5);
+        navigation.select(HomeNavigation.PROFILE);
+        assertEquals(HomeNavigation.NETWORK, navigation.move(HomeNavigation.Direction.RIGHT));
+        assertEquals(HomeNavigation.NETWORK, navigation.move(HomeNavigation.Direction.UP));
+        HomeNavigation restored = new HomeNavigation();
+        restored.restore(navigation.target(), navigation.lastRow());
+        assertEquals(HomeNavigation.NETWORK, restored.target());
+        assertEquals(5, restored.move(HomeNavigation.Direction.DOWN));
+    }
+
     @Test public void recreationPreservesIdleAndLastRowWithoutPersistingColdFocus() {
         HomeNavigation restored = new HomeNavigation();
         restored.restore(HomeNavigation.IDLE, 5);

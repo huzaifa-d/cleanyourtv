@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 import java.io.File;
+import java.io.IOException;
+import android.graphics.Bitmap;
+import android.util.Log;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +42,7 @@ public final class AuroraActivity extends Activity {
     private MemoryCounter memory;
     private NetworkMonitor network;
     private AuroraSettingsDialog settings;
+    private LauncherSounds sounds;
     private final ExecutorService memoryWorker = Executors.newSingleThreadExecutor();
     private final BroadcastReceiver changes = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -66,18 +70,29 @@ public final class AuroraActivity extends Activity {
                 View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         catalog = new AppCatalog(this);
-        library = new AppLibraryDialog(this, catalog, result -> apps = result);
         if (state != null) navigation.restore(state.getInt("target", HomeNavigation.IDLE),
                 state.getInt("last_row", 0));
         home = new AuroraHomeView(this, navigation, this::selected);
         network = new NetworkMonitor(this, main, home::setNetworkStatus);
         preferences = new AuroraPreferences(getSharedPreferences("aurora", MODE_PRIVATE));
-        File directory;
+        File directory, external = null;
         try {
-            File external = getExternalFilesDir(null);
+            external = getExternalFilesDir(null);
             directory = external == null ? null : new File(external, "backgrounds");
             if (directory != null && !directory.isDirectory() && !directory.mkdirs()) directory = null;
-        } catch (RuntimeException unavailable) { directory = null; }
+        } catch (RuntimeException unavailable) {
+            Log.w("Aurora", "App-owned storage is unavailable", unavailable);
+            directory = null;
+        }
+        try {
+            Bitmap photo = ProfilePhoto.load(external == null ? null : new File(external, "profile.jpg"));
+            if (photo != null) home.setProfilePhoto(photo);
+        } catch (IOException | SecurityException failure) {
+            Log.w("Aurora", "Custom profile photo failed", failure);
+            Toast.makeText(this, R.string.custom_profile_failed, Toast.LENGTH_LONG).show();
+        }
+        sounds = new LauncherSounds(this, external, state != null && state.getBoolean("login_played"));
+        library = new AppLibraryDialog(this, catalog, result -> apps = result, sounds::attach);
         files = new BackgroundFiles(directory);
         FrameLayout root = new FrameLayout(this);
         surface = new BackgroundSurface(this, ready -> {
@@ -102,12 +117,21 @@ public final class AuroraActivity extends Activity {
             @Override public void cancel() { memoryTimer.removeCallbacksAndMessages(null); }
         }, memoryWorker, task -> main.post(task), reading -> home.setMemoryText(reading == null
                 ? getString(R.string.memory_unavailable) : reading.display()));
-        settings = new AuroraSettingsDialog(this, preferences, files, this::beginPanel, this::reconcile);
+        settings = new AuroraSettingsDialog(this, preferences, files, this::beginPanel, this::reconcile,
+                sounds::attach);
         setContentView(root);
+        sounds.attach(getWindow().getDecorView());
         home.applyFocus(navigation.target());
         catalog.load(result -> apps = result);
     }
     private void selected(int target) {
+        if (target == HomeNavigation.NETWORK) return;
+        if (target == HomeNavigation.QUICK_SETTINGS) {
+            if (!SystemSettings.openQuickSettings(this)) {
+                Toast.makeText(this, R.string.quick_settings_unavailable, Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
         if (target == HomeNavigation.PROFILE) {
             settings.show(() -> { if (!destroyed) home.applyFocus(HomeNavigation.PROFILE); });
             return;
@@ -213,6 +237,7 @@ public final class AuroraActivity extends Activity {
         home.setMemoryVisible(preferences.showRam());
         memory.setEnabled(preferences.showRam());
         memory.setActive(homeActive());
+        sounds.setActive(resumed && screenOn && (windowFocused || !openPanels.isEmpty()));
         if (homeActive()) clockTick.run();
         if (!homeActive() || !surfaceReady) { background.deactivate(); return; }
         String selection = preferences.video();
@@ -224,6 +249,7 @@ public final class AuroraActivity extends Activity {
     @Override protected void onDestroy() {
         destroyed = true;
         home.setHomeActive(false);
+        sounds.close();
         main.removeCallbacksAndMessages(null);
         background.close();
         memory.close();
@@ -236,6 +262,7 @@ public final class AuroraActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state) {
         state.putInt("target", navigation.target());
         state.putInt("last_row", navigation.lastRow());
+        state.putBoolean("login_played", sounds.loginPlayed());
         super.onSaveInstanceState(state);
     }
     @Override protected void onNewIntent(Intent intent) {

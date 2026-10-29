@@ -13,6 +13,7 @@
     <item type="id" name="apple_tv" />
     <item type="id" name="all_apps" />
     <item type="id" name="clock" />
+    <item type="id" name="quick_settings" />
     <item type="id" name="network_status" />
     <item type="id" name="memory" />
     <item type="id" name="background_surface" />

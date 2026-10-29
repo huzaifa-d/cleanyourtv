@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 final class CreditsDialog {
     private CreditsDialog() { }
     static AlertDialog create(Activity activity) {
-        StringBuilder text = new StringBuilder("Aurora Native ");
+        StringBuilder text = new StringBuilder(activity.getString(R.string.app_name)).append(' ');
         try {
             text.append(activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0).versionName);
         } catch (android.content.pm.PackageManager.NameNotFoundException unavailable) { text.append("1.0"); }

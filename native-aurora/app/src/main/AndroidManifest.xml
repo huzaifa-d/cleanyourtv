@@ -29,6 +29,8 @@
         </intent>
         <intent><action android:name="android.settings.SETTINGS" /></intent>
         <intent><action android:name="android.settings.MANAGE_APPLICATIONS_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.ACCESSIBILITY_SETTINGS" /></intent>
+        <intent><action android:name="android.app.action.OPEN_NOTIFICATION_HANDLER_PANEL" /></intent>
     </queries>
     <application android:label="@string/app_name" android:theme="@style/Theme.Aurora"
         android:icon="@drawable/aurora_launcher" android:banner="@drawable/aurora_banner"
@@ -46,5 +48,14 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".HomeKeyService" android:exported="true"
+            android:label="@string/home_button_service"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data android:name="android.accessibilityservice"
+                android:resource="@xml/home_key_service" />
+        </service>
     </application>
 </manifest>

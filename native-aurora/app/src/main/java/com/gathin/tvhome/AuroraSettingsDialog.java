@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 final class AuroraSettingsDialog {
     private final Activity activity;
@@ -22,15 +23,17 @@ final class AuroraSettingsDialog {
     private final BackgroundFiles files;
     private final Supplier<Runnable> beginPanel;
     private final Runnable changed;
+    private final Consumer<AlertDialog> attachSounds;
     private final Set<AlertDialog> panels = new LinkedHashSet<>();
     private AlertDialog hub;
     AuroraSettingsDialog(Activity activity, AuroraPreferences preferences, BackgroundFiles files,
-            Supplier<Runnable> beginPanel, Runnable changed) {
+            Supplier<Runnable> beginPanel, Runnable changed, Consumer<AlertDialog> attachSounds) {
         this.activity = activity;
         this.preferences = preferences;
         this.files = files;
         this.beginPanel = beginPanel;
         this.changed = changed;
+        this.attachSounds = attachSounds;
     }
     boolean isShowing() { return hub != null && hub.isShowing(); }
     void show(Runnable dismissed) {
@@ -50,6 +53,7 @@ final class AuroraSettingsDialog {
         button(rows, R.string.inputs, this::inputs);
         button(rows, R.string.system_settings, () -> system(false));
         button(rows, R.string.app_management, () -> system(true));
+        button(rows, R.string.home_button_setup, this::homeButton);
         button(rows, R.string.about, () -> showPanel(CreditsDialog.create(activity), () -> { }));
         hub = new AlertDialog.Builder(activity).setTitle(R.string.profile_settings).setView(scroll(rows))
                 .setNegativeButton(android.R.string.cancel, null).create();
@@ -122,6 +126,18 @@ final class AuroraSettingsDialog {
         if (SystemSettings.open(activity, applications)) close();
         else message(R.string.settings_unavailable);
     }
+    private void homeButton() {
+        int status = HomeKeyService.isEnabled(activity) ? R.string.home_button_enabled
+                : R.string.home_button_disabled;
+        AlertDialog dialog = new AlertDialog.Builder(activity).setTitle(R.string.home_button_setup)
+                .setMessage(activity.getString(status) + "\n\n" + activity.getString(R.string.home_button_instructions))
+                .setPositiveButton(R.string.open_accessibility, (ignored, which) -> {
+                    if (SystemSettings.openAccessibility(activity)) close();
+                    else message(R.string.settings_unavailable);
+                })
+                .setNegativeButton(android.R.string.cancel, null).create();
+        showPanel(dialog, () -> { });
+    }
     private void showPanel(AlertDialog dialog, Runnable dismissed) {
         Runnable release = beginPanel.get();
         panels.add(dialog);
@@ -130,7 +146,7 @@ final class AuroraSettingsDialog {
             release.run();
             dismissed.run();
         });
-        try { dialog.show(); }
+        try { dialog.show(); attachSounds.accept(dialog); }
         catch (RuntimeException failure) {
             panels.remove(dialog);
             release.run();

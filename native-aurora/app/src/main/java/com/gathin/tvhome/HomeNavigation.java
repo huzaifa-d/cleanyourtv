@@ -1,6 +1,8 @@
 package com.gathin.tvhome;
 
 final class HomeNavigation {
+    static final int NETWORK = -4;
+    static final int QUICK_SETTINGS = -3;
     static final int IDLE = -2;
     static final int PROFILE = -1;
     private static final int LAST_ROW = BrandShortcut.values().length - 1;
@@ -23,6 +25,14 @@ final class HomeNavigation {
                 : direction == Direction.LEFT ? LAST_ROW : 0;
         else if (current == PROFILE) {
             if (direction == Direction.DOWN) current = lastRow;
+            else if (direction == Direction.RIGHT) current = NETWORK;
+        } else if (current == NETWORK) {
+            if (direction == Direction.DOWN) current = lastRow;
+            else if (direction == Direction.LEFT) current = PROFILE;
+            else if (direction == Direction.RIGHT) current = QUICK_SETTINGS;
+        } else if (current == QUICK_SETTINGS) {
+            if (direction == Direction.DOWN) current = lastRow;
+            else if (direction == Direction.LEFT) current = NETWORK;
         } else if (direction == Direction.UP) current = current < 4 ? PROFILE : UP[current - 4];
         else if (direction == Direction.DOWN) {
             if (current < 4) current = DOWN[current];
@@ -33,7 +43,7 @@ final class HomeNavigation {
     }
     void clear() { current = IDLE; }
     void select(int target) {
-        if (target < IDLE || target > LAST_ROW) throw new IllegalArgumentException("Invalid target");
+        if (target < NETWORK || target > LAST_ROW) throw new IllegalArgumentException("Invalid target");
         current = target;
         if (target >= 0) lastRow = target;
     }

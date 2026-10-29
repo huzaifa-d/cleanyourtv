@@ -7,7 +7,7 @@
     <string name="system_settings">System settings</string>
     <string name="app_management">App management</string>
     <string name="about">About and credits</string>
-    <string name="background_directory">Copy MP4 files to:\n%1$s\n\nSelected: %2$s\n\nUninstalling Aurora Native deletes copied backgrounds, not your PC originals.</string>
+    <string name="background_directory">Copy MP4 files to:\n%1$s\n\nSelected: %2$s\n\nUninstalling Cherry Launcher deletes copied backgrounds, not your PC originals.</string>
     <string name="storage_unavailable">App-owned storage is unavailable on this device.</string>
     <string name="default_background">Default background</string>
     <string name="refresh">Refresh files</string>
@@ -16,7 +16,17 @@
     <string name="no_inputs">No TV inputs were reported. Open system settings to choose a source on this TV.</string>
     <string name="input_unavailable">This input could not be opened. Try system settings instead.</string>
     <string name="settings_unavailable">System settings are unavailable or blocked on this device.</string>
-    <string name="app_name">Aurora Native</string>
+    <string name="app_name">Cherry Launcher</string>
+    <string name="quick_settings">Quick settings</string>
+    <string name="quick_settings_unavailable">The TV quick-settings panel is unavailable or blocked. Use the remote settings button or System settings.</string>
+    <string name="home_button_setup">Home button setup</string>
+    <string name="home_button_service">Cherry Launcher Home button</string>
+    <string name="home_button_description">Opens Cherry Launcher when you press Home. Handles only Home, without reading screen content. Turn off other Home-button remappers first.</string>
+    <string name="home_button_enabled">Cherry Launcher Home button is enabled in Accessibility.</string>
+    <string name="home_button_disabled">Cherry Launcher Home button is off in Accessibility.</string>
+    <string name="home_button_instructions">Open Accessibility settings and enable Cherry Launcher Home button. If another helper, such as Key Mapper or Cinematic, already remaps Home, turn off its Home mapping or helper first.\n\nOther buttons and default Home are unchanged. To undo, disable this service in Accessibility. Force-stopping Cherry Launcher also stops its helper; reopen the app and check Accessibility afterwards.\n\nAfter enabling, test the Home button on your real remote.</string>
+    <string name="open_accessibility">Open Accessibility settings</string>
+    <string name="home_button_failed">Could not open Cherry Launcher. Home was left to Android.</string>
     <string name="profile_settings">Profile and settings</string>
     <string name="good_morning">Good morning, Maahi</string>
     <string name="good_afternoon">Good afternoon, Maahi</string>
@@ -28,6 +38,8 @@
     <string name="cannot_open">Could not open %1$s</string>
     <string name="not_installed">%1$s is not installed</string>
     <string name="video_failed">Could not play the background. Using the still wallpaper; choose another video in settings.</string>
+    <string name="custom_profile_failed">Could not load profile.jpg. Using the default profile icon.</string>
+    <string name="custom_sound_failed">Could not use %1$s. Check the custom sound file.</string>
     <string name="memory_unavailable">App RAM (PSS) unavailable\nTV RAM unavailable</string>
     <string name="network_ethernet">Ethernet connected</string>
     <string name="network_wifi">Wi-Fi connected</string>

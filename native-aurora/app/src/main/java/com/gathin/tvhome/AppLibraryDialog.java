@@ -29,12 +29,15 @@ final class AppLibraryDialog {
     private boolean initialFocus;
     private String pendingFocus;
     private final Consumer<List<AppCatalog.Entry>> updated;
+    private final Consumer<AlertDialog> attachSounds;
     private final List<AppCatalog.Entry> entries = new ArrayList<>();
 
-    AppLibraryDialog(Activity activity, AppCatalog catalog, Consumer<List<AppCatalog.Entry>> updated) {
+    AppLibraryDialog(Activity activity, AppCatalog catalog, Consumer<List<AppCatalog.Entry>> updated,
+            Consumer<AlertDialog> attachSounds) {
         this.activity = activity;
         this.catalog = catalog;
         this.updated = updated;
+        this.attachSounds = attachSounds;
     }
     void show(View anchor, Runnable dismissed) {
         if (isShowing()) return;
@@ -64,7 +67,7 @@ final class AppLibraryDialog {
             dialog = null;
             dismissed.run();
         });
-        try { dialog.show(); }
+        try { dialog.show(); attachSounds.accept(dialog); }
         catch (RuntimeException failure) { dialog = null; dismissed.run(); throw failure; }
         if (dialog.getWindow() != null) dialog.getWindow().setLayout(
                 Math.min(dp(780), activity.getResources().getDisplayMetrics().widthPixels - dp(48)),

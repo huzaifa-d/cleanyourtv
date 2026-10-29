@@ -17,6 +17,11 @@ final class OutputResolutionIconView extends ImageView {
         render();
     }
 
+    void setBitmapContent(Bitmap bitmap) {
+        resource = renderedResource = 0;
+        setImageBitmap(bitmap);
+    }
+
     void setOutputScale(float scale) {
         outputScale = scale;
         render();

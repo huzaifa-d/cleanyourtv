@@ -1,4 +1,4 @@
-# Aurora Native
+# Cherry Launcher
 
 Standalone Java / Android Views adaptation of CleanYourTV, pinned to
 `76a9312cd9ac378fc8698f31427805af32c6f965`, with the approved Cherry Blossom home.
@@ -9,18 +9,20 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 
 | Item | Value |
 | --- | --- |
-| Display name | Aurora Native |
+| Display name | Cherry Launcher |
 | Application ID | `com.huzaifa.aurora.nativehome` |
 | Activity | `com.gathin.tvhome.AuroraActivity` |
 | Minimum Android | 8.0 / API 26 |
-| Version | 1.5 / code 6 |
+| Version | 1.7 / code 8 |
 | Local checkout | `A:\Repos\CleanYourTV.CherryBlossom` |
-| Fork / branch | `huzaifa-d/cleanyourtv` / `Cherry-BLossom` |
+| Fork / branch | `huzaifa-d/cleanyourtv` / `Cherry-Blossom` |
 
 It installs alongside Neons and CleanYourTV. It does not choose default Home,
-disable packages, run cleanup, intercept global remote keys or enable services.
+disable packages, run cleanup or enable services automatically.
 The only permission is `ACCESS_NETWORK_STATE`, for the clock's connection icon.
-There are no internet, storage, accessibility or privileged-settings permissions.
+There are no internet, storage or privileged-settings permissions. The optional
+Home-button service is protected by `BIND_ACCESSIBILITY_SERVICE` and runs only
+after you enable it in the TV's Accessibility settings.
 
 ## Build
 
@@ -89,8 +91,27 @@ the app folder are ignored. Use a new filename rather than overwriting a playing
 file. If a TV firmware denies ADB access to this app-specific folder, report that
 restriction; the app does not broaden permissions or expose an import server.
 
-**Uninstalling Aurora Native deletes its copied backgrounds and preferences.**
+**Uninstalling Cherry Launcher deletes its copied backgrounds and preferences.**
 The PC originals and Neons are unaffected.
+
+### Optional private profile and sounds
+
+The app reads optional `profile.jpg`, `Login.mp3` and `Nav.mp3` directly from its
+own files directory, normally
+`/sdcard/Android/data/com.huzaifa.aurora.nativehome/files/`. They are not bundled
+in source or APKs and require no extra permissions. Transfer complete files
+through temporary `.part` names as above, then launch the app again.
+Uninstalling deletes these copies too; keep the originals on your PC.
+
+The profile is a bounded, circular, 1.5x centre crop, displayed at three times
+the original avatar's width and height without increasing the crop zoom. Login plays once per
+launcher start, not on every return from another app. Navigation plays once
+per focus move on Home and in the launcher's panels, replacing Android effects
+without changing system volume. Rapid navigation stops the preceding sample
+rather than stacking clicks. Sounds stop when leaving the launcher or turning
+the screen off. With no custom files, the existing icon and sound behaviour
+remain; invalid files are reported. SoundPool predecodes short samples, with
+a limit of 1 MiB per sample (about 5.6 seconds of 44.1 kHz stereo audio).
 
 ## Controls
 
@@ -103,6 +124,11 @@ The PC originals and Neons are unaffected.
 | Up / Down between rows | Nearest mapped blossom |
 | Left / Right in row | Adjacent shortcut; no wrapping |
 | Down from profile | Last row item, initially Netflix |
+| Left / Right across header | Profile, network status, quick settings |
+| OK on network status | Keep focus; no action |
+| Down from network status | Last row item, initially Netflix |
+| Down from cog | Last row item, initially Netflix |
+| OK on cog | Open the TV's real quick-settings panel |
 | OK | Open shortcut, All Apps or profile hub |
 | Menu on Home | Profile/settings hub |
 | Back in panel | Close that panel |
@@ -128,6 +154,12 @@ maximum 1.17x focus size. Brand images are decoded for that same peak output siz
 bounded by the original asset resolution. Library icons use their displayed
 pixel dimensions and a size-aware cache.
 The clock uses the device's timezone and 12/24-hour preference.
+The header's right side is time, circled network status, then circled cog.
+Both icons are selectable; network activation deliberately does nothing.
+The cog beside it opens the exported `android.app.action.OPEN_NOTIFICATION_HANDLER_PANEL`
+activity used by Google TV. This is the TV's own dashboard, not a recreated panel.
+Back returns to Cherry Launcher. If the firmware does not expose that action,
+the app reports it rather than silently opening a different settings page.
 Its small white status icon shows Ethernet or Wi-Fi when Android validates the
 default connection's internet access, or a crossed-out connection otherwise,
 including captive portals. An unusual validated transport uses a generic online
@@ -147,8 +179,25 @@ when Home is inactive and on detach; resuming does not advance hidden time.
 System-disabled animation stops the petal loop. The background itself is still.
 
 The hub contains Background, Show RAM counter, HDMI / Inputs, System settings,
-App management and About/credits. Inputs use Android TV channel intents and
+App management, Home button setup and About/credits. Inputs use Android TV channel intents and
 Sony fallbacks; they do not remap physical remote keys.
+
+### Optional Home button
+
+Open **profile / Menu > Home button setup > Open Accessibility settings**, then
+enable **Cherry Launcher Home button** yourself. The setup shows its current
+enabled status. Only Home is intercepted; screen content is not requested and
+other buttons pass through. Holding Home launches once, not on every repeat.
+Other Home remappers (including Key Mapper or Cinematic) may get the key first:
+disable their Home mapping or helper before testing Cherry with the real remote.
+Do not overwrite the enabled-service list or disable unrelated accessibility aids.
+No default-Home or stock-launcher settings are changed. Turn the service off in
+Accessibility to undo it. Force-stopping Cherry also stops its helper; reopen
+the app and check Accessibility afterwards.
+
+The visible name and banner are Cherry; the application ID, activity and
+preferences retain their original names so matching-signed updates preserve
+existing private files and settings.
 
 Custom MP4s play at **1x**. There is no speed selector; previously saved speed
 values are ignored. Selection and RAM visibility persist across restarts and

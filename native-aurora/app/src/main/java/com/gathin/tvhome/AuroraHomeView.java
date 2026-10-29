@@ -12,7 +12,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +26,7 @@ final class AuroraHomeView extends FrameLayout {
     private final FrameLayout composition;
     private final BlossomTile[] tiles = new BlossomTile[BrandShortcut.values().length];
     private final PetalView petals;
-    private final OutputResolutionIconView profile;
+    private final OutputResolutionIconView profile, settings;
     private final TextView greeting, clock, memory;
     private final Typeface typeface, urduTypeface;
     private final HomeNavigation navigation;
@@ -83,7 +82,7 @@ final class AuroraHomeView extends FrameLayout {
         profile = new OutputResolutionIconView(context);
         profile.setId(R.id.profile);
         profile.setImageResource(R.drawable.aurora_profile);
-        profile.setPadding(2, 2, 2, 2);
+        profile.setPadding(6, 6, 6, 6);
         profile.setContentDescription(context.getString(R.string.profile_settings));
         profile.setFocusable(true);
         profile.setFocusableInTouchMode(true);
@@ -93,26 +92,44 @@ final class AuroraHomeView extends FrameLayout {
             if (focused) navigation.select(HomeNavigation.PROFILE);
         });
         profile.setBackground(frame(false, true));
-        composition.addView(profile, position(21, 21, 54, 39));
+        composition.addView(profile, position(63, 63, 33, 18));
         greeting = text(15.6f);
         greeting.setId(R.id.greeting);
         greeting.setSingleLine(true);
         greeting.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-        composition.addView(greeting, position(500, 64, 85, 18));
+        composition.addView(greeting, position(450, 64, 110, 18));
         clock = text(17.3f);
         clock.setId(R.id.clock);
         clock.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         clock.setFontFeatureSettings("tnum");
-        LinearLayout clockGroup = new LinearLayout(context);
-        clockGroup.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        composition.addView(clock, position(160, 32, 662, 34));
         network = new OutputResolutionIconView(context);
         network.setId(R.id.network_status);
         network.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        LinearLayout.LayoutParams networkPosition = new LinearLayout.LayoutParams(18, 18);
-        networkPosition.rightMargin = 10;
-        clockGroup.addView(network, networkPosition);
-        clockGroup.addView(clock, new LinearLayout.LayoutParams(-2, 25));
-        composition.addView(clockGroup, position(210, 25, 696, 37));
+        network.setPadding(6, 6, 6, 6);
+        network.setFocusable(true);
+        network.setFocusableInTouchMode(true);
+        network.setOnClickListener(v -> selected.accept(HomeNavigation.NETWORK));
+        network.setOnFocusChangeListener((v, focused) -> {
+            network.setBackground(frame(focused, true));
+            if (focused) navigation.select(HomeNavigation.NETWORK);
+        });
+        network.setBackground(frame(false, true));
+        composition.addView(network, position(32, 32, 834, 34));
+        settings = new OutputResolutionIconView(context);
+        settings.setId(R.id.quick_settings);
+        settings.setImageResource(R.drawable.cherry_settings);
+        settings.setPadding(5, 5, 5, 5);
+        settings.setContentDescription(context.getString(R.string.quick_settings));
+        settings.setFocusable(true);
+        settings.setFocusableInTouchMode(true);
+        settings.setOnClickListener(v -> selected.accept(HomeNavigation.QUICK_SETTINGS));
+        settings.setOnFocusChangeListener((v, focused) -> {
+            settings.setBackground(frame(focused, true));
+            if (focused) navigation.select(HomeNavigation.QUICK_SETTINGS);
+        });
+        settings.setBackground(frame(false, true));
+        composition.addView(settings, position(32, 32, 882, 34));
         setNetworkStatus(NetworkMonitor.Status.OFFLINE);
 
         Bitmap blossom = decode("aurora/cherry/blossom.png", 673);
@@ -159,7 +176,8 @@ final class AuroraHomeView extends FrameLayout {
     private GradientDrawable frame(boolean focused, boolean circle) {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(circle ? 0x16FFFFFF : focused ? 0x08FFFFFF : Color.TRANSPARENT);
-        drawable.setCornerRadius(circle ? 21 : 4);
+        drawable.setShape(circle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
+        if (!circle) drawable.setCornerRadius(4);
         drawable.setStroke(1, focused ? 0xA0FFFFFF : circle ? 0x55FFFFFF : Color.TRANSPARENT);
         return drawable;
     }
@@ -190,6 +208,7 @@ final class AuroraHomeView extends FrameLayout {
         if (scale <= 0 || iconScale == scale) return;
         iconScale = scale;
         profile.setOutputScale(scale);
+        settings.setOutputScale(scale);
         network.setOutputScale(scale);
         for (BrandShortcut brand : BrandShortcut.values()) {
             int index = brand.ordinal();
@@ -208,8 +227,11 @@ final class AuroraHomeView extends FrameLayout {
     void applyFocus(int target) {
         if (target == HomeNavigation.IDLE) composition.requestFocus();
         else if (target == HomeNavigation.PROFILE) profile.requestFocus();
+        else if (target == HomeNavigation.NETWORK) network.requestFocus();
+        else if (target == HomeNavigation.QUICK_SETTINGS) settings.requestFocus();
         else tiles[target].requestFocus();
     }
+    void setProfilePhoto(Bitmap photo) { profile.setBitmapContent(photo); }
     void setMemoryText(String reading) { memory.setText(reading); }
     void setHomeActive(boolean active) {
         setGreetingActive(active);
