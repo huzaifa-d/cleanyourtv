@@ -10,7 +10,7 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 | Item | Value |
 | --- | --- |
 | Display name | Cherry Launcher |
-| Application ID | `com.huzaifa.aurora.nativehome` |
+| Application ID | `com.huzaifa.cherry.launcher` |
 | Activity | `com.gathin.tvhome.AuroraActivity` |
 | Minimum Android | 8.0 / API 26 |
 | Version | 1.9 / code 10 |
@@ -153,7 +153,7 @@ $serial='SELECTED_TV_SERIAL'
 & $adb -s $serial install -r `
   'A:\Repos\CleanYourTV.CherryBlossom\native-aurora\app\build\outputs\apk\release\app-release.apk'
 & $adb -s $serial shell am start -n `
-  'com.huzaifa.aurora.nativehome/com.gathin.tvhome.AuroraActivity'
+  'com.huzaifa.cherry.launcher/com.gathin.tvhome.AuroraActivity'
 ```
 
 Open **profile / Menu > Background** once. It displays the actual app-owned
@@ -164,11 +164,11 @@ Transfer to a temporary `.part` name, then rename it only when the push succeeds
 
 ```powershell
 & $adb -s $serial push 'A:\Users\modanish\Videos\Looping\Blue Bokeh.mp4' `
-  '/sdcard/Android/data/com.huzaifa.aurora.nativehome/files/backgrounds/Blue Bokeh.mp4.part'
+  '/sdcard/Android/data/com.huzaifa.cherry.launcher/files/backgrounds/Blue Bokeh.mp4.part'
 if ($LASTEXITCODE -eq 0) {
   & $adb -s $serial shell mv `
-    '"/sdcard/Android/data/com.huzaifa.aurora.nativehome/files/backgrounds/Blue Bokeh.mp4.part"' `
-    '"/sdcard/Android/data/com.huzaifa.aurora.nativehome/files/backgrounds/Blue Bokeh.mp4"'
+    '"/sdcard/Android/data/com.huzaifa.cherry.launcher/files/backgrounds/Blue Bokeh.mp4.part"' `
+    '"/sdcard/Android/data/com.huzaifa.cherry.launcher/files/backgrounds/Blue Bokeh.mp4"'
 }
 ```
 
@@ -185,7 +185,7 @@ The PC originals and Neons are unaffected.
 
 The app reads optional `profile.jpg`, `Login.mp3` and `Nav.mp3` directly from its
 own files directory, normally
-`/sdcard/Android/data/com.huzaifa.aurora.nativehome/files/`. They are not bundled
+`/sdcard/Android/data/com.huzaifa.cherry.launcher/files/`. They are not bundled
 in source or APKs and require no extra permissions. Transfer complete files
 through temporary `.part` names as above, then launch the app again.
 Uninstalling deletes these copies too; keep the originals on your PC.
@@ -282,9 +282,36 @@ No default-Home or stock-launcher settings are changed. Turn the service off in
 Accessibility to undo it. Force-stopping Cherry also stops its helper; reopen
 the app and check Accessibility afterwards.
 
-The visible name and banner are Cherry; the application ID, activity and
-preferences retain their original names so matching-signed updates preserve
-existing private files and settings.
+The installed application ID is `com.huzaifa.cherry.launcher`. The internal Java
+namespace, activity and preference filename retain their original names.
+This ID installs separately from the older `com.huzaifa.aurora.nativehome`:
+Android does not migrate that app's private data automatically. Back up and copy
+its app-owned files, then match the Background and RAM options through the UI
+before removing the old installation. Later matching-signed updates to the new
+ID preserve its own files and settings.
+
+### Optional default Home
+
+To select Cherry as Android's default Home explicitly, use the authorised TV
+serial from the installation example:
+
+```powershell
+& $adb -s $serial shell cmd package set-home-activity --user 0 `
+  'com.huzaifa.cherry.launcher'
+& $adb -s $serial shell cmd package resolve-activity --brief --user 0 `
+  -a android.intent.action.MAIN -c android.intent.category.HOME
+```
+
+Verify that resolution returns
+`com.huzaifa.cherry.launcher/com.gathin.tvhome.AuroraActivity`.
+Keep Google TV enabled: the cog uses its dashboard. Accessibility remapping is
+separate and is not required when the firmware honours default Home. Sony's
+power-on behaviour may still differ from Home resolution; test restart and
+standby/wake separately. This app does not add boot/wake autostart logic.
+
+Some Sony firmware accepts the command but still resolves Home to Google TV.
+In that case, use the optional Home-button service above, keeping Google TV
+enabled. Remapping the button does not guarantee launch on power-on or wake.
 
 Custom MP4s play at **1x**. There is no speed selector; previously saved speed
 values are ignored. Selection and RAM visibility persist across restarts and
