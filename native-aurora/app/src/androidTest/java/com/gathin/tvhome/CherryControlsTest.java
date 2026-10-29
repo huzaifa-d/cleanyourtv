@@ -17,9 +17,9 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class CherryControlsTest {
-    @Test public void visibleBrandAndHomeServiceAreCherryWithoutChangingInstalledIdentity() throws Exception {
+    @Test public void visibleBrandAndHomeServiceUseCherryApplicationId() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.huzaifa.aurora.nativehome", context.getPackageName());
+        assertEquals("com.huzaifa.cherry.launcher", context.getPackageName());
         assertEquals("Cherry Launcher", context.getApplicationInfo()
                 .loadLabel(context.getPackageManager()).toString());
         ServiceInfo service = context.getPackageManager().getServiceInfo(
