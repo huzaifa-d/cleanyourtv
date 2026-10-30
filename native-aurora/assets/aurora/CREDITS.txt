@@ -1,12 +1,18 @@
 Cherry Blossom theme: Cherry Blossom Background.jpg and Petals.png,
 supplied by the user. No additional open artwork license is asserted.
-The scheduled defaults derive from background_morning.png, background_night.png,
-foreground_morning.png and foreground_night.png in the user-supplied
-cherry_blossom_layered_assets.zip. Backgrounds are lossless 3840 x 2160 copies.
-The foreground alpha masks are completed around nearby flowers omitted from
-the supplied cutouts. Foreground RGB is reconstructed against the background
-so both dry scenes remain pixel-identical to the original composites.
-The exports are lossless, with no artwork resampling or recolouring.
+The scheduled defaults use the user-supplied
+cherry_blossom_morning_clean_background_4k.png and
+cherry_blossom_night_clean_background_4k.png. The background WebPs preserve
+all supplied RGB pixels at 3840 x 2160, without resampling or sharpening.
+These dimensions do not establish the images' native generation resolution.
+Both foregrounds derive from cherry_blossom_foreground_overlay_4k.png.
+Solid-area alpha is normalised to opaque; enclosed pinholes of at most
+24 source pixels are filled and disconnected specks of at most 8 pixels removed.
+Edge colours are propagated from nearby opaque flower texture, with a
+boundary-only antialias filter. Interior daytime texture is unchanged.
+The subtly tinted night copy multiplies sRGB channels by 0.95, 0.96 and 0.98,
+sharing the same alpha mask. Both are lossless exports of the derived RGBA
+images. No texture resampling, upscaling or redrawing is applied.
 The original 2000 x 1125 JPEG remains a decode
 failure fallback. Detailed Full Moon on Transparent Background.png is also
 user-supplied; an inscribed circular crop removes exterior fringe, with a
@@ -18,6 +24,9 @@ removing disconnected faint alpha debris only. The blossom content is
 649 x 597; the six petal contents are 315-353 pixels wide. Exports retain
 native resolution with 12 pixels of transparent padding on each edge.
 No upscaling, sharpening, recoloring or inpainting was applied.
+The native default-night renderer adds a separate plum centre shade beneath
+the app logos, at up to 33% opacity with a soft 37px logical-radius feather.
+It preserves the blossom texture's alpha and leaves its source PNG unchanged.
 The original sheet and source metadata are retained in cherry/source, which
 is not staged into the APK. Sixteen native sprites share six petal textures.
 

@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.view.Gravity;
@@ -22,8 +24,10 @@ final class BlossomTile extends FrameLayout {
     final ImageView flower, mark;
     private final ValueAnimator focusAnimator = ValueAnimator.ofFloat(0f, 1f);
     private final Paint pulsePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint nightShadePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final float angle;
     private float focusStartScale, pulse;
+    private float nightBlend;
     private boolean active;
     private Bitmap white, colour;
 
@@ -48,6 +52,16 @@ final class BlossomTile extends FrameLayout {
                 Math.round(brand.height * SIZE * 1.1f / 125f), Gravity.CENTER));
         pulsePaint.setShader(new RadialGradient(SIZE / 2f, SIZE / 2f, 37f,
                 0xFFFFD396, 0x00FFD396, Shader.TileMode.CLAMP));
+        int maxAlpha = Math.round(.33f * 255f);
+        int[] shade = new int[] {
+                Color.argb(maxAlpha, 24, 7, 24),
+                Color.argb(Math.round(maxAlpha * .84f), 24, 7, 24),
+                Color.argb(Math.round(maxAlpha * .32f), 24, 7, 24),
+                Color.argb(0, 24, 7, 24)
+        };
+        nightShadePaint.setShader(new RadialGradient(SIZE / 2f, SIZE / 2f, 37f, shade,
+                new float[] {0f, .4f, .75f, 1f}, Shader.TileMode.CLAMP));
+        nightShadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
         focusAnimator.setDuration(700);
         focusAnimator.setInterpolator(new LinearInterpolator());
         focusAnimator.addUpdateListener(animation -> {
@@ -102,6 +116,13 @@ final class BlossomTile extends FrameLayout {
         if (!active) finishFocus();
     }
 
+    void setNightBlend(double blend) {
+        float bounded = (float) Math.max(0, Math.min(1, blend));
+        if (nightBlend == bounded) return;
+        nightBlend = bounded;
+        invalidate();
+    }
+
     private void finishFocus() {
         focusAnimator.cancel();
         animate().cancel();
@@ -114,7 +135,14 @@ final class BlossomTile extends FrameLayout {
     }
 
     @Override protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        boolean more = super.drawChild(canvas, child, drawingTime);
+        boolean more;
+        if (child == flower && nightBlend > 0f) {
+            int layer = canvas.saveLayer(0, 0, SIZE, SIZE, null);
+            more = super.drawChild(canvas, child, drawingTime);
+            nightShadePaint.setAlpha(Math.round(255 * nightBlend));
+            canvas.drawCircle(SIZE / 2f, SIZE / 2f, 37f, nightShadePaint);
+            canvas.restoreToCount(layer);
+        } else more = super.drawChild(canvas, child, drawingTime);
         if (child == flower && pulse > 0f) {
             pulsePaint.setAlpha(Math.round(pulse * 255));
             canvas.drawCircle(SIZE / 2f, SIZE / 2f, 37f, pulsePaint);

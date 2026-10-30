@@ -160,6 +160,7 @@ final class AuroraHomeView extends FrameLayout {
             composition.addView(tile, position(BlossomTile.SIZE, BlossomTile.SIZE,
                     centres[index][0] - BlossomTile.SIZE / 2, centres[index][1] - BlossomTile.SIZE / 2));
         }
+        still.setNightBlendListener(this::setNightBlend);
         memory = text(9f);
         memory.setId(R.id.memory);
         memory.setTextColor(0xBFFFFFFF);
@@ -330,6 +331,10 @@ final class AuroraHomeView extends FrameLayout {
         greeting.setTextLocale(greetingUrdu ? new Locale("ur") : Locale.ENGLISH);
         greeting.setTextDirection(greetingUrdu ? View.TEXT_DIRECTION_RTL : View.TEXT_DIRECTION_LTR);
         greeting.setText(getContext().getString(label));
+    }
+
+    private void setNightBlend(double blend) {
+        for (BlossomTile tile : tiles) tile.setNightBlend(blend);
     }
 
     @Override protected void onMeasure(int widthSpec, int heightSpec) {

@@ -18,11 +18,12 @@ import android.view.View;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZoneId;
+import java.util.function.DoubleConsumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 final class ThemeBackgroundView extends View {
-    static final float MOON_X = 624f, MOON_Y = 81f, MOON_RADIUS = 19.55f;
+    static final float MOON_X = 691f, MOON_Y = 81f, MOON_RADIUS = 19.55f;
     final ThemeScene scene = new ThemeScene();
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final Paint moonPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
@@ -46,6 +47,8 @@ final class ThemeBackgroundView extends View {
     private int outputWidth = 960;
     private boolean active, defaultSelected = true, videoVisible, running;
     private long lastFrame;
+    private DoubleConsumer nightBlendChanged;
+    private double reportedNightBlend = Double.NaN;
     private final Runnable frame = () -> {
         if (!running) return;
         advanceVisible();
@@ -77,6 +80,11 @@ final class ThemeBackgroundView extends View {
             moonPaint.setShader(shader);
         }
         scene.update(clock.getAsLong(), zone.get(), ValueAnimator.areAnimatorsEnabled());
+    }
+
+    void setNightBlendListener(DoubleConsumer listener) {
+        nightBlendChanged = listener;
+        reportNightBlend(true);
     }
 
     void setOutputWidth(int width) {
@@ -154,12 +162,14 @@ final class ThemeBackgroundView extends View {
             if (rain && animate) rainMillis = (rainMillis + now - lastFrame) % 12000;
         }
         lastFrame = now;
+        reportNightBlend(false);
     }
 
     private void reconcile() {
         removeCallbacks(frame);
         running = active && defaultSelected && !videoVisible && isAttachedToWindow();
         refreshArtwork();
+        reportNightBlend(false);
         lastFrame = SystemClock.uptimeMillis();
         invalidate();
         schedule();
@@ -312,5 +322,13 @@ final class ThemeBackgroundView extends View {
             lit.arcTo(terminator, 90, right ? -180 : 180);
         }
         lit.close();
+    }
+
+    private void reportNightBlend(boolean force) {
+        if (nightBlendChanged == null) return;
+        double current = defaultSelected && !videoVisible ? scene.nightBlend : 0;
+        if (!force && current == reportedNightBlend) return;
+        reportedNightBlend = current;
+        nightBlendChanged.accept(current);
     }
 }

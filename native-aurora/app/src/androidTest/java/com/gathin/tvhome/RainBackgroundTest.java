@@ -62,7 +62,7 @@ public class RainBackgroundTest {
     }
 
     @Test @androidx.test.filters.SdkSuppress(minSdkVersion = 29)
-    public void actualArtworkOccludesPetalsOverTheReportedFlowerOnTheGpu() {
+    public void actualArtworkOccludesPetalsOverOpaqueForegroundOnTheGpu() {
         try (ActivityScenario<AuroraActivity> scenario = ActivityScenario.launch(AuroraActivity.class)) {
             scenario.onActivity(activity -> {
                 ThemeBackgroundView view = attach(activity);
@@ -71,7 +71,7 @@ public class RainBackgroundTest {
                 view.setPetals(petals);
                 PetalMotion[] motion = (PetalMotion[]) field(petals, "petals");
                 Bitmap[] textures = (Bitmap[]) field(petals, "textures");
-                for (int[] fixture : new int[][] {{10, 361, 510}, {20, 313, 490}}) {
+                for (int[] fixture : new int[][] {{10, 361, 510}, {20, 361, 510}}) {
                     int x = fixture[1], y = fixture[2];
                     view.scene.update(Instant.parse("2026-03-22T" + fixture[0] + ":00:00Z").toEpochMilli(),
                             ZoneId.of("UTC"), true);

@@ -211,37 +211,37 @@ public class ThemeBackgroundTest {
                 Bitmap full = draw(view);
                 view.setDefaultSelected(false);
                 Bitmap bare = draw(view);
-                assertTrue("Moon must be centred 65% across at the unchanged 15% height",
-                        distance(full.getPixel(624, 81), bare.getPixel(624, 81)) > 40);
-                assertEquals("The old 55% position must no longer contain the Moon",
-                        0, distance(full.getPixel(528, 81), bare.getPixel(528, 81)), 0);
+                assertTrue("Moon must be centred at the approved x-position and unchanged y-height",
+                        distance(full.getPixel(691, 81), bare.getPixel(691, 81)) > 40);
+                assertEquals("The old x-position must no longer contain the Moon",
+                        0, distance(full.getPixel(624, 81), bare.getPixel(624, 81)), 0);
                 view.setDefaultSelected(true);
                 view.scene.introMillis = 5000;
                 Bitmap crescent = draw(view);
                 assertTrue("The terminator must curve, not be a straight wipe",
-                        contrast(crescent, bare, full, 613, 95) > .75);
-                assertTrue(contrast(crescent, bare, full, 613, 81) < .20);
+                        contrast(crescent, bare, full, 680, 95) > .75);
+                assertTrue(contrast(crescent, bare, full, 680, 81) < .20);
 
                 clock.set(time("2026-03-25T20:00:00Z"));
                 view.updateTime();
                 view.scene.introMillis = 5000;
                 Bitmap waxing = draw(view);
-                assertTrue(contrast(waxing, bare, full, 614, 81) > .85);
-                assertTrue(contrast(waxing, bare, full, 634, 81) < .20);
+                assertTrue(contrast(waxing, bare, full, 681, 81) > .85);
+                assertTrue(contrast(waxing, bare, full, 701, 81) < .20);
                 save(waxing, "lunar-waxing");
                 clock.set(time("2026-03-11T20:00:00Z"));
                 view.updateTime();
                 // A different night has an intro; show its completed phase for the drawing assertion.
                 view.scene.introMillis = 5000;
                 Bitmap waning = draw(view);
-                assertTrue(contrast(waning, bare, full, 614, 81) < .20);
-                assertTrue(contrast(waning, bare, full, 634, 81) > .85);
+                assertTrue(contrast(waning, bare, full, 681, 81) < .20);
+                assertTrue(contrast(waning, bare, full, 701, 81) > .85);
                 save(waning, "lunar-waning");
                 clock.set(time("2026-03-19T20:00:00Z"));
                 view.updateTime();
                 view.scene.introMillis = 5000;
                 Bitmap newMoon = draw(view);
-                for (int x : new int[] {614, 634}) {
+                for (int x : new int[] {681, 701}) {
                     double earthshine = contrast(newMoon, bare, full, x, 81);
                     assertTrue("New Moon keeps faint earthshine, not a bright disc: " + earthshine,
                             earthshine > .03 && earthshine < .20);
@@ -279,8 +279,8 @@ public class ThemeBackgroundTest {
                 saveHome(activity, "lunar-phase-home");
                 view.setDefaultSelected(false);
                 Bitmap customFallback = draw(view);
-                assertEquals(0, distance(customFallback.getPixel(624, 81),
-                        ((Bitmap) field(view, "night")).getPixel(1249, 163)), 8);
+                assertEquals(0, distance(customFallback.getPixel(691, 81),
+                        ((Bitmap) field(view, "night")).getPixel(1383, 163)), 8);
                 assertFalse((boolean) field(view, "running"));
                 view.setVideoVisible(true);
                 assertEquals(View.INVISIBLE, view.getVisibility());
@@ -465,6 +465,82 @@ public class ThemeBackgroundTest {
                 scene.onActivity(activity -> {
                     assertEquals(owner.get().scene.phase.fraction, owner.get().scene.illumination(), 1e-9);
                     assertFalse(owner.get().scene.pending());
+                });
+            } finally { scale(previous); }
+        }
+    }
+
+    @Test public void nightBlendListenerTracksSceneBlendSelectionVideoPauseReducedMotionAndRestore()
+            throws Exception {
+        float previous = Settings.Global.getFloat(
+                InstrumentationRegistry.getInstrumentation().getTargetContext().getContentResolver(),
+                Settings.Global.ANIMATOR_DURATION_SCALE, 1);
+        try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
+            try {
+                AtomicLong clock = new AtomicLong(time("2026-03-22T12:00:00Z"));
+                final ThemeBackgroundView[] owner = new ThemeBackgroundView[1];
+                final double[] latest = new double[] {Double.NaN};
+                final int[] updates = new int[1];
+                final double[] beforeRestore = new double[1];
+                final long[] pausedIntro = new long[1];
+                scene.onActivity(activity -> {
+                    ThemeBackgroundView view = attach(activity, clock);
+                    owner[0] = view;
+                    view.layout(0, 0, 960, 540);
+                    view.setNightBlendListener(value -> {
+                        latest[0] = value;
+                        updates[0]++;
+                    });
+                    assertEquals(0, latest[0], 0);
+                    clock.set(time("2026-03-22T20:00:00Z"));
+                    view.updateTime();
+                    view.scene.advance(1000, true);
+                    view.updateTime();
+                    assertEquals(.5, latest[0], 1e-9);
+                    view.setDefaultSelected(false);
+                    assertEquals(0, latest[0], 0);
+                    view.setDefaultSelected(true);
+                    assertEquals(.5, latest[0], 1e-9);
+                    view.setVideoVisible(true);
+                    assertEquals(0, latest[0], 0);
+                    view.setVideoVisible(false);
+                    assertEquals(.5, latest[0], 1e-9);
+                    view.setActive(true);
+                    view.setActive(false);
+                    assertFalse((boolean) field(view, "running"));
+                    pausedIntro[0] = view.scene.introMillis;
+                    Bundle state = new Bundle();
+                    view.save(state);
+                    beforeRestore[0] = view.scene.nightBlend;
+                    ThemeBackgroundView restored = attach(activity, clock);
+                    restored.layout(0, 0, 960, 540);
+                    restored.setNightBlendListener(value -> {
+                        latest[0] = value;
+                        updates[0]++;
+                    });
+                    restored.restore(state);
+                    owner[0] = restored;
+                    assertEquals(beforeRestore[0], restored.scene.nightBlend, 1e-9);
+                    assertEquals(beforeRestore[0], latest[0], 1e-9);
+                });
+                SystemClock.sleep(300);
+                scene.onActivity(activity -> {
+                    assertEquals(beforeRestore[0], latest[0], 0);
+                    assertEquals(pausedIntro[0], owner[0].scene.introMillis);
+                    int count = updates[0];
+                    owner[0].updateTime();
+                    assertEquals("An unchanged blend must not be republished", count, updates[0]);
+                });
+                scale(0);
+                scene.onActivity(activity -> {
+                    owner[0].setDefaultSelected(true);
+                    clock.set(time("2026-03-22T12:00:00Z"));
+                    owner[0].updateTime();
+                    assertEquals(0, latest[0], 0);
+                    clock.set(time("2026-03-22T20:00:00Z"));
+                    owner[0].updateTime();
+                    assertEquals(1, latest[0], 0);
+                    assertTrue(updates[0] > 2);
                 });
             } finally { scale(previous); }
         }

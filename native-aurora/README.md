@@ -47,7 +47,8 @@ the same signing key.
 Artwork/fonts are staged from this module's `assets` folder. The default switches
 between the supplied 4K morning scene from 06:00 to 18:00 (TV-local time) and the
 moon-free night scene otherwise, with a two-second crossfade. At night, a separate
-Moon at 65% across / 15% down holds full for three visible seconds, then its curved
+Moon at (691,81) on the 960x540 scene (about 72% across / 15% down)
+holds full for three visible seconds, then its curved
 shadow transitions over two seconds to the current offline-calculated phase.
 At dusk the hold starts after the background crossfade. Its texture is rotated,
 not mirrored, for Southern orientation: waxing lights the left, waning the right.
@@ -62,9 +63,11 @@ The Moon is decorative all night, not a location-dependent rise/set simulation.
 Illumination uses the SunCalc 1.9.0 astronomical approximation, checked against
 USNO phase fixtures; it requires no network/location permission or new dependency.
 
-Background plates are lossless 3840x2160 WebP copies of the supplied PNGs.
-Foreground masks also cover near-camera flowers omitted from the original
-cutouts, while preserving both dry composited scenes pixel-for-pixel.
+Background plates are lossless 3840x2160 WebP copies of the supplied clean
+morning/night PNGs, without baked foreground foliage or falling petals.
+The supplied foreground overlay has cleaned edge colours, filled tiny alpha
+pinholes and fully opaque solid flowers. A subtly dimmed, cooler night copy shares
+the same mask. Foreground texture is not sharpened, resized or redrawn.
 Layers are decoded to the output resolution; only the current scene stays
 decoded outside crossfades. The transparent Moon
 master is cropped/masked to a clean disc and downsampled to 512px. No video decoder
@@ -226,6 +229,10 @@ Apple TV, JioHotstar and All Apps. Down maps the four upper shortcuts to
 Apple TV, Apple TV, JioHotstar and All Apps; Up maps the lower shortcuts to
 Netflix, YouTube and Disney+. Down at the bottom and horizontal row edges stop.
 Seven differently angled blossoms carry upright white marks at rest.
+Default night scenes add a soft plum centre beneath each logo: 33% maximum
+opacity, feathered to transparent over a 37px radius. The shading follows the
+background crossfade without changing flower alpha or outer petals. Morning
+and custom-video backgrounds retain the original unshaded blossoms.
 Focus grows the blossom to 1.17x over 280 ms, then softly settles to 1.14x over
 420 ms, with a faint warm inner pulse that fades away. This approved G5 effect
 plays once per focus change, never on a loop. The flower still turns another
