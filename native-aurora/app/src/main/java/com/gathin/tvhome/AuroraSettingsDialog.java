@@ -73,15 +73,15 @@ final class AuroraSettingsDialog {
         });
         thumb.setIntrinsicWidth(drawer.u(10));
         thumb.setIntrinsicHeight(drawer.u(14));
-        thumb.getPaint().setColor(0xfff5dce7);
+        thumb.getPaint().setColor(0xfff3c8d2);
         ram.setThumbDrawable(thumb);
         GradientDrawable track = new GradientDrawable();
         track.setCornerRadius(drawer.u(7));
         track.setSize(drawer.u(20), drawer.u(14));
-        track.setColor(0xffb68ca3);
+        track.setColor(0xffb65c76);
         ram.setTrackDrawable(track);
         ram.setTrackTintList(new ColorStateList(new int[][] {{android.R.attr.state_checked}, {}},
-                new int[] {0xffb68ca3, 0xff756677}));
+                new int[] {0xffb65c76, 0xff541526}));
         ram.setChecked(preferences.showRam());
         ram.setOnCheckedChangeListener((view, enabled) -> {
             preferences.setShowRam(enabled);
@@ -101,6 +101,7 @@ final class AuroraSettingsDialog {
             if (SystemSettings.openGoogleHome(activity)) close();
             else message(R.string.google_home_unavailable);
         }));
+        tiles.add(drawer.button(R.string.daily_standby, DrawerIcon.SCREENSAVER, this::dailyStandby));
         mainContent = drawer.grid(tiles);
         returnFocus = tiles.get(0);
         mainScroll = 0;
@@ -198,6 +199,41 @@ final class AuroraSettingsDialog {
         button(rows, R.string.open_accessibility,
                 () -> shortcut(R.string.accessibility, Settings.ACTION_ACCESSIBILITY_SETTINGS));
         page(R.string.home_button_setup, rows);
+    }
+    private void dailyStandby() {
+        StandbyScheduler.reschedule(activity);
+        LinearLayout rows = rows();
+        label(rows, activity.getString(R.string.standby_description));
+        TextView status = new TextView(activity);
+        status.setId(R.id.standby_status);
+        drawer.text(status, 12);
+        status.setPadding(0, drawer.u(8), 0, drawer.u(12));
+        status.setText(StandbyScheduler.status(activity));
+        rows.addView(status);
+        Switch skip = new Switch(activity);
+        drawer.style(skip, DrawerIcon.SCREENSAVER);
+        skip.setId(R.id.standby_skip_today);
+        skip.setText(R.string.standby_skip_today);
+        skip.setChecked(StandbyScheduler.skippedToday(activity));
+        skip.setOnCheckedChangeListener((view, enabled) -> {
+            if (enabled == StandbyScheduler.skippedToday(activity)) return;
+            if (!StandbyScheduler.skipToday(activity, enabled)) {
+                skip.setChecked(StandbyScheduler.skippedToday(activity));
+            }
+            status.setText(StandbyScheduler.status(activity));
+        });
+        rows.addView(skip);
+        if (!StandbyScheduler.canSchedule(activity)) {
+            button(rows, R.string.standby_open_alarm_access, () -> {
+                if (SystemSettings.openExactAlarmAccess(activity)) close();
+                else message(R.string.settings_unavailable);
+            });
+        }
+        if (!HomeKeyService.isEnabled(activity)) {
+            button(rows, R.string.open_accessibility,
+                    () -> shortcut(R.string.accessibility, Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        }
+        page(R.string.daily_standby, rows);
     }
     private void shortcut(int title, String action) {
         if (SystemSettings.openAction(activity, action)) { close(); return; }

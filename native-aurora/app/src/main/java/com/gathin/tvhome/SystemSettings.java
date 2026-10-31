@@ -38,6 +38,22 @@ final class SystemSettings {
     static boolean openAccessibility(Activity activity) {
         return openAction(activity, Settings.ACTION_ACCESSIBILITY_SETTINGS);
     }
+    static boolean openExactAlarmAccess(Activity activity) {
+        if (android.os.Build.VERSION.SDK_INT < 31) return false;
+        Intent target = intent(activity, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+        if (target == null) {
+            Log.w("CherrySettings", "Exact-alarm access settings are unavailable");
+            return false;
+        }
+        target.setData(android.net.Uri.fromParts("package", activity.getPackageName(), null));
+        try {
+            activity.startActivity(target);
+            return true;
+        } catch (android.content.ActivityNotFoundException | SecurityException failure) {
+            Log.w("CherrySettings", "Could not open exact-alarm access settings", failure);
+            return false;
+        }
+    }
     static boolean openProfiles(Activity activity) {
         return openComponent(activity, new ComponentName(
                 "com.google.android.apps.tv.launcherx",

@@ -13,7 +13,7 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 | Application ID | `com.huzaifa.cherry.launcher` |
 | Activity | `com.gathin.tvhome.AuroraActivity` |
 | Minimum Android | 8.0 / API 26 |
-| Version | 1.9 / code 10 |
+| Version | 1.12 / code 13 |
 | Local checkout | `A:\Repos\CleanYourTV.CherryBlossom` |
 | Fork / branch | `huzaifa-d/cleanyourtv` / `Cherry-Blossom` |
 
@@ -21,6 +21,8 @@ It installs alongside Neons and CleanYourTV. It does not choose default Home,
 disable packages, run cleanup or enable services automatically.
 Permissions are `ACCESS_NETWORK_STATE` for the connection icon and `INTERNET`
 for the explicitly approved Redmond weather feature in this standalone fork.
+`SCHEDULE_EXACT_ALARM` and `RECEIVE_BOOT_COMPLETED` support the daily standby
+schedule and restore it after reboot.
 There are no location, storage or privileged-settings permissions. The optional
 Home-button service is protected by `BIND_ACCESSIBILITY_SERVICE` and runs only
 after you enable it in the TV's Accessibility settings.
@@ -186,7 +188,7 @@ The PC originals and Neons are unaffected.
 
 ### Optional private profile and sounds
 
-The app reads optional `profile.jpg`, `Login.mp3` and `Nav.mp3` directly from its
+The app reads optional `profile.jpg`, `Login.mp3`, `Nav.mp3` and `Menu.mp3` directly from its
 own files directory, normally
 `/sdcard/Android/data/com.huzaifa.cherry.launcher/files/`. They are not bundled
 in source or APKs and require no extra permissions. Transfer complete files
@@ -202,6 +204,21 @@ rather than stacking clicks. Sounds stop when leaving the launcher or turning
 the screen off. With no custom files, the existing icon and sound behaviour
 remain; invalid files are reported. SoundPool predecodes short samples, with
 a limit of 1 MiB per sample (about 5.6 seconds of 44.1 kHz stereo audio).
+
+`Menu.mp3` is optional blossom Home music. It is streamed with Android MediaPlayer,
+not predecoded into the short-effect SoundPool. It plays once from the beginning
+on each return to visible Home, without looping. Opening the drawer, All Apps,
+another app or the system dashboard, turning off the screen, or losing audio
+focus stops it and releases playback. Returning to Home starts a fresh play;
+completion alone does not restart it. Login and navigation effects are unchanged.
+The music uses normal media volume without changing system volume settings.
+Keep the private file outside source/APKs and transfer it through a temporary
+`Menu.mp3.part` name before renaming it in the app-owned files directory.
+Missing music preserves silent Home; invalid media is logged and reported.
+
+The right-hand drawer uses a wine-red `#65192e` to `#280c17` gradient, warm white
+labels and icons, and a pale `#f5dce7` focus tile with dark wine text. Its
+layout, focus navigation and actions are unchanged.
 
 ## Controls
 
@@ -288,6 +305,37 @@ Do not overwrite the enabled-service list or disable unrelated accessibility aid
 No default-Home or stock-launcher settings are changed. Turn the service off in
 Accessibility to undo it. Force-stopping Cherry also stops its helper; reopen
 the app and check Accessibility afterwards.
+
+### Daily standby
+
+Two independent standby alarms are enabled by default: **8:03 PM Monday-Friday**
+and **8:30 PM every day**, using the TV's local clock. They go straight to
+standby without a warning, including while Netflix or another app is open.
+It is not a full shutdown.
+
+Open **profile / Menu > Daily standby > Skip today** to skip both cutoffs only for the current calendar date. The exception expires
+the next day; unchecking it restores tonight's cutoffs that have not passed.
+Starting the TV or opening Cherry after 8:03 PM leaves 8:30 PM scheduled for
+today. After 8:30 PM, each alarm waits until its next eligible date. A missed
+cutoff is never caught up with an immediate shutdown.
+
+The page shows each alarm's next eligible date and whether both are ready. Allow exact
+alarms when requested and keep **Cherry Launcher Home button** enabled in
+Accessibility: that existing helper performs Android's screen-lock action.
+Standby requires Android 9 or later, even though Home works on Android 8.
+If alarm access or the helper is unavailable, the page says so. A failed
+timer attempt is logged, reported by a toast and retained in the page until
+a successful standby.
+
+Two Android exact alarms run independently of the launcher screen, without a
+new background service. The schedule is restored after reboot, app update,
+clock/timezone changes and restoration of exact-alarm access. Delivery outside
+the scheduled minute is ignored, and completion is tracked separately for each
+cutoff. Repeated delivery of one cutoff cannot put the TV back to sleep again,
+but waking the TV after 8:03 PM does not disable its 8:30 PM alarm. An already sleeping TV
+stays asleep; the alarm can wake the CPU but never turns the screen on.
+Force-stopping Cherry cancels Android alarms and disables its helper until
+the app is reopened/re-enabled. Recheck the page afterwards.
 
 The installed application ID is `com.huzaifa.cherry.launcher`. The internal Java
 namespace, activity and preference filename retain their original names.

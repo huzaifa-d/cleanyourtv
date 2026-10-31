@@ -44,6 +44,7 @@ public final class AuroraActivity extends Activity {
     private RainWeather weather;
     private AuroraSettingsDialog settings;
     private LauncherSounds sounds;
+    private HomeMusic music;
     private final ExecutorService memoryWorker = Executors.newSingleThreadExecutor();
     private final BroadcastReceiver changes = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -97,6 +98,7 @@ public final class AuroraActivity extends Activity {
             Toast.makeText(this, R.string.custom_profile_failed, Toast.LENGTH_LONG).show();
         }
         sounds = new LauncherSounds(this, external, state != null && state.getBoolean("login_played"));
+        music = new HomeMusic(this, external);
         library = new AppLibraryDialog(this, catalog, result -> apps = result, sounds::attach);
         files = new BackgroundFiles(directory);
         FrameLayout root = new FrameLayout(this);
@@ -211,6 +213,7 @@ public final class AuroraActivity extends Activity {
     }
     @Override protected void onResume() {
         super.onResume();
+        StandbyScheduler.reschedule(this);
         resumed = true;
         // A preserved window can retain focus without a new focus callback.
         windowFocused = hasWindowFocus();
@@ -253,6 +256,7 @@ public final class AuroraActivity extends Activity {
         memory.setEnabled(preferences.showRam());
         memory.setActive(homeActive());
         sounds.setActive(resumed && screenOn && (windowFocused || !openPanels.isEmpty()));
+        music.setActive(homeActive());
         if (homeActive()) clockTick.run();
         if (!homeActive() || !surfaceReady) { background.deactivate(); return; }
         String selection = preferences.video();
@@ -265,6 +269,7 @@ public final class AuroraActivity extends Activity {
         destroyed = true;
         weather.close();
         home.setHomeActive(false);
+        music.close();
         sounds.close();
         main.removeCallbacksAndMessages(null);
         background.close();

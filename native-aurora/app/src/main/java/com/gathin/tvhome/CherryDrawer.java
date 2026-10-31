@@ -17,7 +17,7 @@ import android.widget.TextView;
 import java.util.List;
 
 final class CherryDrawer extends LinearLayout {
-    static final int TEXT = 0xfffff4f8, FOCUSED_TEXT = 0xff33232e;
+    static final int TEXT = 0xfffff4f4, FOCUSED_TEXT = 0xff3b1118;
     private final float scale, fontScale;
     private final LinearLayout header, mainHeader;
     private final ScrollView scroll;
@@ -33,9 +33,9 @@ final class CherryDrawer extends LinearLayout {
         setOrientation(VERTICAL);
         setPadding(u(18), u(20), u(18), u(10));
         GradientDrawable panel = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[] {0xff493744, 0xff292432});
+                new int[] {0xff65192e, 0xff280c17});
         panel.setCornerRadius(u(25));
-        panel.setStroke(Math.max(1, u(1)), 0x2eb989a5);
+        panel.setStroke(Math.max(1, u(1)), 0x60bd5973);
         setBackground(panel);
         header = new LinearLayout(activity);
         boolean largeText = fontScale > 1.3f;
@@ -85,7 +85,7 @@ final class CherryDrawer extends LinearLayout {
         StateListDrawable states = new StateListDrawable();
         states.addState(new int[] {android.R.attr.state_focused}, shape(0xfff5dce7, radius));
         states.addState(new int[] {android.R.attr.state_pressed}, shape(0xfff5dce7, radius));
-        states.addState(new int[0], shape(0x18ffffff, radius));
+        states.addState(new int[0], shape(0x458d3046, radius));
         return states;
     }
 

@@ -19,4 +19,6 @@
     <item type="id" name="dedication" />
     <item type="id" name="background_surface" />
     <item type="id" name="petals" />
+    <item type="id" name="standby_skip_today" />
+    <item type="id" name="standby_status" />
 </resources>

@@ -46,6 +46,32 @@ public class CherryDrawerTest {
     @After public void cleanup() { context.getSharedPreferences("aurora", 0).edit().clear().commit(); }
     private void menu() { onView(isRoot()).perform(pressKey(KeyEvent.KEYCODE_MENU)); }
 
+    @Test public void approvedWineDrawerAndPaleFocusTileAreRendered() {
+        try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
+            menu();
+            onView(withTagValue(is("cherry_drawer"))).check((view, error) -> {
+                if (error != null) throw error;
+                Bitmap image = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+                try {
+                    view.getBackground().draw(new Canvas(image));
+                    int centre = image.getPixel(image.getWidth() / 2, image.getHeight() / 2);
+                    assertEquals(70, Color.red(centre), 3);
+                    assertEquals(19, Color.green(centre), 3);
+                    assertEquals(35, Color.blue(centre), 3);
+                } finally { image.recycle(); }
+            });
+            onView(withText(R.string.background)).check((view, error) -> {
+                if (error != null) throw error;
+                Bitmap image = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+                try {
+                    view.getBackground().draw(new Canvas(image));
+                    assertEquals(0xfff5dce7, image.getPixel(image.getWidth() / 2, image.getHeight() / 2));
+                    assertEquals(0xff3b1118, ((android.widget.TextView) view).getCurrentTextColor());
+                } finally { image.recycle(); }
+            });
+        }
+    }
+
     @Test public void approvedDrawerHasRightAlignmentAndIconOnlyHeaderWithoutDedication() {
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
             menu();
@@ -66,7 +92,7 @@ public class CherryDrawerTest {
             for (int title : new int[] {R.string.background, R.string.drawer_ram,
                     R.string.screensaver, R.string.inputs, R.string.bluetooth,
                     R.string.accessibility, R.string.app_management,
-                    R.string.home_button_setup, R.string.google_home}) {
+                    R.string.home_button_setup, R.string.google_home, R.string.daily_standby}) {
                 onView(withText(title)).check((view, error) -> {
                     if (error != null) throw error;
                     android.graphics.drawable.Drawable glyph = ((android.widget.TextView) view)
@@ -79,7 +105,7 @@ public class CherryDrawerTest {
         }
     }
 
-    @Test public void dpadReachesHeaderAndUnpairedTileAndNestedBackRestoresFocus() {
+    @Test public void dpadReachesHeaderAndStandbyTileAndNestedBackRestoresFocus() {
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
             menu();
             onView(withText(R.string.background)).perform(pressKey(KeyEvent.KEYCODE_DPAD_UP));
@@ -96,7 +122,7 @@ public class CherryDrawerTest {
                 onView(withTagValue(is("cherry_drawer"))).perform(pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
             onView(withText(R.string.google_home)).check(matches(hasFocus()))
                     .perform(pressKey(KeyEvent.KEYCODE_DPAD_RIGHT));
-            onView(withText(R.string.google_home)).check(matches(hasFocus()));
+            onView(withText(R.string.daily_standby)).check(matches(hasFocus()));
             pressBack();
             scene.onActivity(activity -> assertTrue(activity.findViewById(R.id.profile).hasFocus()));
         }
