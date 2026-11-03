@@ -13,7 +13,7 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 | Application ID | `com.huzaifa.cherry.launcher` |
 | Activity | `com.gathin.tvhome.AuroraActivity` |
 | Minimum Android | 8.0 / API 26 |
-| Version | 1.15 / code 16 |
+| Version | 1.16 / code 17 |
 | Local checkout | `A:\Repos\CleanYourTV.CherryBlossom` |
 | Fork / branch | `huzaifa-d/cleanyourtv` / `Cherry-Blossom` |
 
@@ -281,11 +281,11 @@ including captive portals. An unusual validated transport uses a generic online
 glyph. This is system-reported status, not a guarantee every service is reachable.
 Updates use a foreground network callback, without polling or external requests.
 
-The greeting alternates fifteen seconds of English with ten seconds of Urdu,
+The greeting starts with ten seconds of Urdu, then fifteen seconds of English,
 using a gentle 400 ms fade/slide. Urdu uses bundled OFL-licensed Noto Sans Arabic with native
 right-to-left shaping on one horizontal line, anchored beside the profile. Time-of-day updates preserve
 the current language. The cycle stops behind panels and when Home is inactive;
-returning starts a fresh English interval.
+returning starts a fresh Urdu interval.
 
 Sixteen falling petals share six native textures in one Canvas view, with
 independent 14-36-second cycles, varied opacity, phase, size, angle and drift.

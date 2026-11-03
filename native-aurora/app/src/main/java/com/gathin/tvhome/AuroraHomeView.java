@@ -35,7 +35,7 @@ final class AuroraHomeView extends FrameLayout {
     private final ThemeBackgroundView still;
     private final OutputResolutionIconView network;
     private float iconScale;
-    private boolean greetingActive, greetingUrdu;
+    private boolean greetingActive, greetingUrdu = true;
     private int greetingGeneration;
     private long dedicationRemaining = 10000, dedicationVisibleSince;
     private boolean dedicationActive;
@@ -286,9 +286,9 @@ final class AuroraHomeView extends FrameLayout {
         greeting.animate().cancel();
         greeting.setAlpha(1f);
         greeting.setTranslationY(0f);
-        greetingUrdu = false;
+        greetingUrdu = true;
         updateGreeting();
-        if (active) postDelayed(greetingTick, 15000);
+        if (active) postDelayed(greetingTick, 10000);
     }
     void setNetworkStatus(NetworkMonitor.Status status) {
         network.setImageResource(status.drawable);

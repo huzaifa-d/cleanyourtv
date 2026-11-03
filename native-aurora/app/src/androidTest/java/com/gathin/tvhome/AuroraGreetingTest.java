@@ -46,15 +46,15 @@ public class AuroraGreetingTest {
         fail("Greeting did not complete its scheduled language transition");
     }
 
-    @Test public void alternatesFifteenSecondEnglishAndTenSecondUrduAndResetsAfterPanel() {
+    @Test public void startsWithTenSecondUrduThenFifteenSecondEnglishAndResetsAfterPanel() {
         try (ActivityScenario<AuroraActivity> scene = ActivityScenario.launch(AuroraActivity.class)) {
-            awaitLanguage(scene, false);
-            long start = SystemClock.uptimeMillis();
-            SystemClock.sleep(13500);
-            scene.onActivity(activity -> assertEquals(activity.getString(expected(false)),
+            scene.onActivity(activity -> assertEquals(activity.getString(expected(true)),
                     ((TextView) activity.findViewById(R.id.greeting)).getText()));
             awaitLanguage(scene, true);
-            assertTrue(SystemClock.uptimeMillis() - start >= 14500);
+            long start = SystemClock.uptimeMillis();
+            SystemClock.sleep(8500);
+            scene.onActivity(activity -> assertEquals(activity.getString(expected(true)),
+                    ((TextView) activity.findViewById(R.id.greeting)).getText()));
             scene.onActivity(activity -> {
                 AuroraHomeView home = (AuroraHomeView) field(activity, "home");
                 TextView greeting = activity.findViewById(R.id.greeting);
@@ -70,14 +70,21 @@ public class AuroraGreetingTest {
             });
             awaitLanguage(scene, false);
             long elapsed = SystemClock.uptimeMillis() - start;
-            assertTrue("Must return after the ten-second Urdu interval", elapsed >= 24500);
-            assertTrue("Urdu must not stay visible for fifteen seconds", elapsed < 27500);
+            assertTrue("Urdu must remain first for ten seconds", elapsed >= 9500);
+            assertTrue("Urdu must not stay visible for fifteen seconds", elapsed < 12500);
             SystemClock.sleep(11000);
             scene.onActivity(activity -> assertEquals(activity.getString(expected(false)),
                     ((TextView) activity.findViewById(R.id.greeting)).getText()));
             awaitLanguage(scene, true);
-            assertTrue("Subsequent English intervals must also last fifteen seconds",
-                    SystemClock.uptimeMillis() - start >= 39500);
+            elapsed = SystemClock.uptimeMillis() - start;
+            assertTrue("English must last fifteen seconds", elapsed >= 24500);
+            assertTrue("The full cycle must not stretch beyond twenty-five seconds", elapsed < 27500);
+            SystemClock.sleep(8500);
+            scene.onActivity(activity -> assertEquals(activity.getString(expected(true)),
+                    ((TextView) activity.findViewById(R.id.greeting)).getText()));
+            awaitLanguage(scene, false);
+            assertTrue("Subsequent Urdu intervals must also last ten seconds",
+                    SystemClock.uptimeMillis() - start >= 34500);
             androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.isRoot())
                     .perform(androidx.test.espresso.action.ViewActions.pressKey(KeyEvent.KEYCODE_MENU));
             scene.onActivity(activity -> {
@@ -86,7 +93,7 @@ public class AuroraGreetingTest {
             });
             androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.isRoot())
                     .perform(androidx.test.espresso.action.ViewActions.pressKey(KeyEvent.KEYCODE_BACK));
-            awaitLanguage(scene, false);
+            awaitLanguage(scene, true);
             scene.onActivity(activity -> assertEquals(Boolean.TRUE,
                     field(field(activity, "home"), "greetingActive")));
         }
