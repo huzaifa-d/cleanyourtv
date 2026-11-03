@@ -196,6 +196,19 @@ final class AuroraSettingsDialog {
                 : R.string.home_button_disabled;
         LinearLayout rows = rows();
         label(rows, activity.getString(status) + "\n\n" + activity.getString(R.string.home_button_instructions));
+        Switch startup = new Switch(activity);
+        drawer.style(startup, DrawerIcon.HOME);
+        startup.setId(R.id.startup_home);
+        startup.setText(R.string.startup_home);
+        startup.setChecked(HomeKeyService.startupEnabled(activity));
+        startup.setOnCheckedChangeListener((view, enabled) -> {
+            if (enabled == HomeKeyService.startupEnabled(activity)) return;
+            if (!HomeKeyService.setStartupEnabled(activity, enabled)) {
+                startup.setChecked(HomeKeyService.startupEnabled(activity));
+            }
+        });
+        rows.addView(startup);
+        label(rows, activity.getString(R.string.startup_home_description));
         button(rows, R.string.open_accessibility,
                 () -> shortcut(R.string.accessibility, Settings.ACTION_ACCESSIBILITY_SETTINGS));
         page(R.string.home_button_setup, rows);

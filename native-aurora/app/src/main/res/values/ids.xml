@@ -21,4 +21,5 @@
     <item type="id" name="petals" />
     <item type="id" name="standby_skip_today" />
     <item type="id" name="standby_status" />
+    <item type="id" name="startup_home" />
 </resources>

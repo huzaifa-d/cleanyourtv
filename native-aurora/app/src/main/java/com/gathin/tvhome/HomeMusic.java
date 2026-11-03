@@ -23,20 +23,26 @@ final class HomeMusic implements AutoCloseable {
     private MediaPlayer player;
     private AudioFocusRequest focus;
     private long generation;
+    private int requestedPosition;
+    private boolean playing;
 
     HomeMusic(Context context, File directory) {
         this.context = context;
         file = directory == null ? null : new File(directory, "Menu.mp3");
         audio = context.getSystemService(AudioManager.class);
         session = new HomeMusicSession(new HomeMusicSession.Backend() {
-            @Override public void prepare(long generation) { HomeMusic.this.prepare(generation); }
+            @Override public void prepare(long generation, int position) {
+                HomeMusic.this.prepare(generation, position);
+            }
             @Override public void start() { HomeMusic.this.start(); }
+            @Override public Integer playingPosition() { return HomeMusic.this.playingPosition(); }
             @Override public void release() { HomeMusic.this.release(); }
         });
     }
 
-    private void prepare(long generation) {
+    private void prepare(long generation, int position) {
         this.generation = generation;
+        requestedPosition = position;
         try {
             if (file == null || !file.exists()) {
                 session.finished(generation);
@@ -47,12 +53,24 @@ final class HomeMusic implements AutoCloseable {
             loading.setAudioAttributes(attributes);
             loading.setLooping(false);
             loading.setOnPreparedListener(owner -> {
-                if (player == owner) session.prepared(generation);
+                if (player != owner) return;
+                if (position == 0) {
+                    session.prepared(generation);
+                    return;
+                }
+                try {
+                    owner.setOnSeekCompleteListener(seeked -> {
+                        if (player == seeked) session.prepared(generation);
+                    });
+                    owner.seekTo(position, MediaPlayer.SEEK_CLOSEST);
+                } catch (IllegalStateException | IllegalArgumentException | SecurityException failure) {
+                    failed(generation, failure);
+                }
             });
             loading.setOnCompletionListener(owner -> {
                 if (player == owner) {
                     Log.i(TAG, "Menu.mp3 finished; waiting for the next Home return");
-                    session.finished(generation);
+                    session.completed(generation);
                 }
             });
             loading.setOnErrorListener((owner, what, extra) -> {
@@ -93,7 +111,8 @@ final class HomeMusic implements AutoCloseable {
                 return;
             }
             ready.start();
-            Log.i(TAG, "Menu.mp3 started from the beginning on Home");
+            playing = true;
+            Log.i(TAG, "Menu.mp3 started on Home at " + requestedPosition + " ms");
         } catch (IllegalStateException | IllegalArgumentException | SecurityException failure) {
             failed(currentGeneration, failure);
         }
@@ -101,18 +120,33 @@ final class HomeMusic implements AutoCloseable {
 
     private void failed(long generation, Exception failure) {
         Log.w(TAG, "Custom Home music failed", failure);
+        playing = false;
         session.finished(generation);
         Toast.makeText(context, context.getString(R.string.custom_sound_failed, "Menu.mp3"),
                 Toast.LENGTH_LONG).show();
     }
 
+    private Integer playingPosition() {
+        if (!playing || player == null) return null;
+        try {
+            return player.getCurrentPosition();
+        } catch (IllegalStateException failure) {
+            Log.w(TAG, "Could not save Home music position; keeping the previous bookmark", failure);
+            Toast.makeText(context, context.getString(R.string.custom_sound_failed, "Menu.mp3"),
+                    Toast.LENGTH_LONG).show();
+            return null;
+        }
+    }
+
     private void release() {
         MediaPlayer previous = player;
         player = null;
+        playing = false;
         if (previous != null) {
             previous.setOnPreparedListener(null);
             previous.setOnCompletionListener(null);
             previous.setOnErrorListener(null);
+            previous.setOnSeekCompleteListener(null);
             previous.release();
         }
         if (focus != null && audio != null) {

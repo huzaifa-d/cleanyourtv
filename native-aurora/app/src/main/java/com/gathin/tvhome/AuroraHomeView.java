@@ -171,8 +171,7 @@ final class AuroraHomeView extends FrameLayout {
         dedication.setId(R.id.dedication);
         dedication.setText(R.string.created_with_love);
         dedication.setGravity(Gravity.LEFT | Gravity.BOTTOM);
-        dedication.setShadowLayer(3f, 0f, 1f, 0xCC000000);
-        dedication.setAlpha(.3f);
+        dedication.setTextColor(0x4DFFFFFF);
         dedication.setVisibility(INVISIBLE);
         dedication.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         composition.addView(dedication, position(280, 20, 33, 508));

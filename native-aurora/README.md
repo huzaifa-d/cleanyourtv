@@ -13,7 +13,7 @@ The original CleanYourTV launcher, tools and root MIT licence are unchanged.
 | Application ID | `com.huzaifa.cherry.launcher` |
 | Activity | `com.gathin.tvhome.AuroraActivity` |
 | Minimum Android | 8.0 / API 26 |
-| Version | 1.12 / code 13 |
+| Version | 1.15 / code 16 |
 | Local checkout | `A:\Repos\CleanYourTV.CherryBlossom` |
 | Fork / branch | `huzaifa-d/cleanyourtv` / `Cherry-Blossom` |
 
@@ -119,6 +119,8 @@ The Show RAM pill is 20x14 logical pixels, with its original height retained.
 cumulative visible seconds per launcher start. Panels, other apps and screen-off
 pause the delay; Activity recreation preserves progress. Once shown it remains,
 without taking D-pad focus or announcing itself through accessibility.
+The small caption uses 30% text-colour opacity without a shadow or whole-view fade
+to keep its edges clear while retaining the subtle appearance.
 
 Drawer icons use official Google Material Symbols Rounded vectors, not custom
 path approximations. Each glyph caches antialiased coverage at its actual pixel
@@ -206,11 +208,13 @@ remain; invalid files are reported. SoundPool predecodes short samples, with
 a limit of 1 MiB per sample (about 5.6 seconds of 44.1 kHz stereo audio).
 
 `Menu.mp3` is optional blossom Home music. It is streamed with Android MediaPlayer,
-not predecoded into the short-effect SoundPool. It plays once from the beginning
-on each return to visible Home, without looping. Opening the drawer, All Apps,
+not predecoded into the short-effect SoundPool. It resumes from an in-memory
+bookmark on each return to visible Home, without looping. Opening the drawer, All Apps,
 another app or the system dashboard, turning off the screen, or losing audio
-focus stops it and releases playback. Returning to Home starts a fresh play;
-completion alone does not restart it. Login and navigation effects are unchanged.
+focus saves its position, stops it and releases playback. Returning to Home seeks
+to that position before playing. Restarting Cherry clears the bookmark. Natural
+completion resets the bookmark to the beginning for the next Home return, but
+does not immediately restart playback. Login and navigation effects are unchanged.
 The music uses normal media volume without changing system volume settings.
 Keep the private file outside source/APKs and transfer it through a temporary
 `Menu.mp3.part` name before renaming it in the app-owned files directory.
@@ -362,11 +366,25 @@ Verify that resolution returns
 Keep Google TV enabled: the cog uses its dashboard. Accessibility remapping is
 separate and is not required when the firmware honours default Home. Sony's
 power-on behaviour may still differ from Home resolution; test restart and
-standby/wake separately. This app does not add boot/wake autostart logic.
+standby/wake separately.
 
 Some Sony firmware accepts the command but still resolves Home to Google TV.
 In that case, use the optional Home-button service above, keeping Google TV
 enabled. Remapping the button does not guarantee launch on power-on or wake.
+
+For automatic startup, enable **Home button setup > Open Cherry on power-on**.
+This separate switch is off by default and requires the existing Cherry accessibility
+helper. It opens Cherry once after a new Android boot and each screen wake, even over
+a resumed app or HDMI input. It waits briefly for the firmware, never wakes the screen,
+and waits for Android unlock. A remote key other than a power/wake/sleep key cancels
+the pending automatic handover so a deliberate app or input choice wins. Google TV
+or its profile chooser may appear first; this is not a replacement for Sony firmware.
+Enabling the switch does not immediately open Home. Rebinding the helper or updating
+Cherry during the same boot does not interrupt an app. Force-stopping Cherry or
+disabling its helper prevents automatic startup. Turn the switch off to undo.
+No new service, polling, screen-content access or launcher disabling is used.
+Real-TV restart and standby/wake tests are required before claiming that Sony's
+startup routing is fixed; a successful install or connected helper alone is not proof.
 
 Custom MP4s play at **1x**. There is no speed selector; previously saved speed
 values are ignored. Selection and RAM visibility persist across restarts and
